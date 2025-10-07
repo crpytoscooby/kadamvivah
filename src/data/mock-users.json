@@ -1,0 +1,18 @@
+[
+  {
+    "id": "user-001",
+    "email": "admin@kadamvivah.in",
+    "password": "admin123",
+    "firstName": "Admin",
+    "lastName": "User",
+    "role": "admin"
+  },
+  {
+    "id": "user-002",
+    "email": "test@example.com",
+    "password": "test123",
+    "firstName": "Test",
+    "lastName": "User",
+    "role": "user"
+  }
+]
