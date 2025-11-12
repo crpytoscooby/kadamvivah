@@ -8,7 +8,7 @@ import { useState } from 'react';
  * Navbar - Main navigation component
  * 
  * Features:
- * - Logo with Marathi badge 'कद'
+ * - Logo with Maratha badge 'कद'
  * - Responsive mobile menu
  * - Shows Login/Register when logged out
  * - Shows user menu with profile and logout when logged in

@@ -1,6 +1,6 @@
-# KadamVivah - Marathi Matrimony Website
+# KadamVivah - Maratha Matrimony Website
 
-A free, modern matrimonial platform for the Marathi-speaking community. Built with React, Vite, and Tailwind CSS.
+A free, modern matrimonial platform for the Maratha-speaking community. Built with React, Vite, and Tailwind CSS.
 
 ## 🌟 Features
 
@@ -10,7 +10,7 @@ A free, modern matrimonial platform for the Marathi-speaking community. Built wi
 - **Advanced Filtering** - Filter profiles by gender, age, city, education, and more
 - **Admin Dashboard** - Full CRUD operations for profile management (admin only)
 - **Responsive Design** - Mobile-first, accessible UI with Tailwind CSS
-- **Bilingual Interface** - Marathi and English content throughout
+- **Bilingual Interface** - Maratha and English content throughout
 - **Protected Routes** - Profiles visible only to authenticated users
 
 ## 🚀 Quick Start
@@ -205,7 +205,7 @@ To replace mock auth with a real backend:
 The application includes sample profiles in `src/data/mock-profiles.json`:
 
 - 6 sample profiles with diverse backgrounds
-- Realistic Marathi names and locations
+- Realistic Maratha names and locations
 - Various education levels and occupations
 - Family details and bios
 

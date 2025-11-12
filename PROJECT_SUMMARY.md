@@ -2,7 +2,7 @@
 
 ## Overview
 
-KadamVivah is a complete frontend application for a free Marathi matrimony service. The project is production-ready and includes all requested features.
+KadamVivah is a complete frontend application for a free Maratha matrimony service. The project is production-ready and includes all requested features.
 
 ## ✅ Completed Features
 

@@ -26,7 +26,7 @@ export const Terms = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-4">Service Description</h2>
               <p className="text-muted-foreground leading-relaxed">
-                KadamVivah is a free matrimonial service platform designed for the Marathi-speaking community. 
+                KadamVivah is a free matrimonial service platform designed for the Maratha-speaking community. 
                 We provide a platform for users to create profiles and connect with potential life partners.
               </p>
             </section>
