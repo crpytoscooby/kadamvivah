@@ -11,6 +11,7 @@ import { Register } from './pages/Register';
 import { Profiles } from './pages/Profiles';
 import { ProfileDetail } from './pages/ProfileDetail';
 import { Admin } from './pages/Admin';
+import { AdminImport } from './pages/AdminImport';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
@@ -70,6 +71,14 @@ function App() {
                 element={
                   <ProtectedRoute requireAdmin={true}>
                     <Admin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/import"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminImport />
                   </ProtectedRoute>
                 }
               />

@@ -20,7 +20,7 @@ export const About = () => {
               <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
                 KadamVivah is a <span className="font-semibold text-foreground">completely free</span> matrimonial 
-                service dedicated to the Maratha-speaking community. We believe that finding a life partner should 
+                service dedicated to the Marathi-speaking community. We believe that finding a life partner should 
                 be accessible to everyone, without financial barriers.
               </p>
               <p className="text-muted-foreground leading-relaxed font-devanagari">
@@ -51,7 +51,7 @@ export const About = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Community Focused</h3>
                 <p className="text-muted-foreground text-sm">
-                  Built specifically for Maratha families with deep respect for cultural values and traditions.
+                  Built specifically for Marathi families with deep respect for cultural values and traditions.
                 </p>
               </CardContent>
             </Card>
@@ -122,7 +122,7 @@ export const About = () => {
             <CardContent className="p-8">
               <h2 className="text-2xl font-bold mb-4">Our Commitment</h2>
               <p className="text-muted-foreground leading-relaxed">
-                We are committed to maintaining this platform as a free service for the Maratha community. 
+                We are committed to maintaining this platform as a free service for the Marathi community. 
                 This initiative is driven by the desire to serve and support families in their search for 
                 suitable life partners, without commercial interests.
               </p>

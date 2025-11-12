@@ -19,7 +19,7 @@ export const Footer = () => {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Free Maratha matrimony service connecting families with trust and respect.
+              Free Marathi matrimony service connecting families with trust and respect.
             </p>
             <p className="text-sm text-muted-foreground mt-2 font-devanagari">
               विनामूल्य मराठी विवाह सेवा
@@ -67,7 +67,7 @@ export const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
           <p className="flex items-center">
-            Made with <Heart className="w-4 h-4 mx-1 text-primary fill-current" /> for the Maratha community
+            Made with <Heart className="w-4 h-4 mx-1 text-primary fill-current" /> for the Marathi community
           </p>
           <p className="mt-2 md:mt-0">
             © {new Date().getFullYear()} KadamVivah. All rights reserved.

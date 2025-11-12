@@ -8,7 +8,7 @@ import { Heart, Lock, Users, Shield, CheckCircle } from 'lucide-react';
  * Home Page - Landing page with hero, CTA, and blocked profile preview
  * 
  * Features:
- * - Hero section with Maratha and English copy
+ * - Hero section with Marathi and English copy
  * - CTA to register (free service messaging)
  * - Blocked/blurred profile preview for non-authenticated users
  * - Thank you section for Nitin Kadam
@@ -31,7 +31,7 @@ export const Home = () => {
               योग्य जोडीदार शोधा
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 text-balance">
-              KadamVivah is a <span className="font-semibold text-foreground">free</span> matrimony service for the Maratha community. 
+              KadamVivah is a <span className="font-semibold text-foreground">free</span> matrimony service for the Marathi community. 
               Create an account to view profiles and connect with families.
             </p>
             <p className="text-base md:text-lg text-muted-foreground mb-8 font-devanagari">
@@ -132,7 +132,7 @@ export const Home = () => {
                 </div>
                 <h4 className="text-lg font-semibold mb-2">100% Free</h4>
                 <p className="text-sm text-muted-foreground">
-                  No hidden charges. Completely free service for the Maratha community.
+                  No hidden charges. Completely free service for the Marathi community.
                 </p>
               </CardContent>
             </Card>
@@ -156,7 +156,7 @@ export const Home = () => {
                 </div>
                 <h4 className="text-lg font-semibold mb-2">Community Focused</h4>
                 <p className="text-sm text-muted-foreground">
-                  Built specifically for Maratha-speaking families with cultural respect.
+                  Built specifically for Marathi-speaking families with cultural respect.
                 </p>
               </CardContent>
             </Card>

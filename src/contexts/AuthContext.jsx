@@ -1,17 +1,13 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import api from '../lib/api';
 
 /**
  * AuthContext - Manages authentication state across the application
  * 
  * Stores:
  * - token: JWT token from login (stored in localStorage)
- * - user: User object with { id, email, firstName, lastName, role }
- * 
- * Backend integration notes:
- * - Replace mockLogin with actual API call to POST /api/auth/login
- * - Replace mockRegister with actual API call to POST /api/auth/register
- * - Add token refresh logic if using refresh tokens
- * - Validate token on app load (e.g., GET /api/auth/me)
+ * - user: User object with { id, email, firstName, lastName, role, mustChangePassword }
+ * - mustChangePassword: Flag to force password change on first login
  */
 
 const AuthContext = createContext(null);
@@ -27,99 +23,66 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Load token and user from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('authUser');
+    const storedMustChangePassword = localStorage.getItem('mustChangePassword') === 'true';
     
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
+      setMustChangePassword(storedMustChangePassword);
     }
     setLoading(false);
   }, []);
 
-  // Mock login - replace with actual API call
+  // Login with email and password
   const login = async (email, password) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await api.post('/auth/login', { email, password });
-      // const { token, user } = response.data;
-      
-      // Mock implementation
-      const mockUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-      const foundUser = mockUsers.find(u => u.email === email && u.password === password);
-      
-      if (!foundUser) {
-        throw new Error('Invalid email or password');
-      }
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user } = response.data;
 
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      const userData = {
-        id: foundUser.id,
-        email: foundUser.email,
-        firstName: foundUser.firstName,
-        lastName: foundUser.lastName,
-        role: foundUser.role || 'user'
-      };
+      setToken(token);
+      setUser(user);
+      setMustChangePassword(user.mustChangePassword || false);
 
-      setToken(mockToken);
-      setUser(userData);
-      localStorage.setItem('authToken', mockToken);
-      localStorage.setItem('authUser', JSON.stringify(userData));
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('authUser', JSON.stringify(user));
+      localStorage.setItem('mustChangePassword', user.mustChangePassword ? 'true' : 'false');
 
-      return { success: true, user: userData };
+      return { success: true, user };
     } catch (error) {
       console.error('Login error:', error);
       throw error;
     }
   };
 
-  // Mock register - replace with actual API call
-  const register = async (userData) => {
+  // Change password
+  const changePassword = async (oldPassword, newPassword, confirmPassword) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await api.post('/auth/register', userData);
-      // const { token, user } = response.data;
-      
-      // Mock implementation
-      const mockUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-      
-      // Check if email already exists
-      if (mockUsers.find(u => u.email === userData.email)) {
-        throw new Error('Email already registered');
-      }
+      const response = await api.post('/auth/change-password', {
+        oldPassword,
+        newPassword,
+        confirmPassword
+      });
 
-      const newUser = {
-        id: 'user-' + Date.now(),
-        ...userData,
-        role: 'user',
-        createdAt: new Date().toISOString()
-      };
+      const { token, user } = response.data;
 
-      mockUsers.push(newUser);
-      localStorage.setItem('mockUsers', JSON.stringify(mockUsers));
+      setToken(token);
+      setUser(user);
+      setMustChangePassword(false);
 
-      // Auto-login after registration
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      const userForContext = {
-        id: newUser.id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role
-      };
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('authUser', JSON.stringify(user));
+      localStorage.setItem('mustChangePassword', 'false');
 
-      setToken(mockToken);
-      setUser(userForContext);
-      localStorage.setItem('authToken', mockToken);
-      localStorage.setItem('authUser', JSON.stringify(userForContext));
-
-      return { success: true, user: userForContext };
+      return { success: true, user };
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Change password error:', error);
       throw error;
     }
   };
@@ -127,8 +90,10 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
+    setMustChangePassword(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
+    localStorage.removeItem('mustChangePassword');
   };
 
   const isAuthenticated = () => {
@@ -142,9 +107,10 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token,
+    mustChangePassword,
     loading,
     login,
-    register,
+    changePassword,
     logout,
     isAuthenticated,
     isAdmin

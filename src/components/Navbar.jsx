@@ -3,12 +3,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
 import { Menu, X, User, LogOut, UserCog } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LanguageToggle } from './LanguageToggle';
 
 /**
  * Navbar - Main navigation component
  * 
  * Features:
- * - Logo with Maratha badge 'कद'
+ * - Logo with Marathi badge 'कद'
  * - Responsive mobile menu
  * - Shows Login/Register when logged out
  * - Shows user menu with profile and logout when logged in
@@ -19,6 +21,7 @@ export const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useTranslation('common');
 
   const handleLogout = () => {
     logout();
@@ -43,14 +46,16 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/" className="text-foreground hover:text-primary transition-colors">
-              Home
+              {t('home')}
             </Link>
             <Link to="/about" className="text-foreground hover:text-primary transition-colors">
-              About
+              {t('about')}
             </Link>
             <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
-              Contact
+              {t('contact')}
             </Link>
+            
+            <LanguageToggle />
 
             {isAuthenticated() ? (
               <>
@@ -58,12 +63,19 @@ export const Navbar = () => {
                   <Button variant="ghost">Profiles</Button>
                 </Link>
                 {isAdmin() && (
-                  <Link to="/admin">
-                    <Button variant="ghost" size="sm">
-                      <UserCog className="w-4 h-4 mr-2" />
-                      Admin
-                    </Button>
-                  </Link>
+                  <>
+                    <Link to="/admin">
+                      <Button variant="ghost" size="sm">
+                        <UserCog className="w-4 h-4 mr-2" />
+                        {t('admin')}
+                      </Button>
+                    </Link>
+                    <Link to="/admin/import">
+                      <Button variant="ghost" size="sm">
+                        Import
+                      </Button>
+                    </Link>
+                  </>
                 )}
                 <div className="flex items-center space-x-2 border-l border-border pl-4 ml-2">
                   <span className="text-sm text-muted-foreground">
@@ -78,10 +90,10 @@ export const Navbar = () => {
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outline">Login</Button>
+                  <Button variant="outline">{t('login')}</Button>
                 </Link>
                 <Link to="/register">
-                  <Button>Register</Button>
+                  <Button>{t('register')}</Button>
                 </Link>
               </>
             )}
