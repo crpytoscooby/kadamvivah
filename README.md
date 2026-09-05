@@ -1,6 +1,6 @@
 # KadamVivah — कदमविवाह
 
-A **free, modern matrimony platform for the Marathi-speaking community**, built with React + Vite + Tailwind CSS. The app is fully functional today running on **mock data (localStorage)** — no backend required to run or demo it. It is structured so a real backend can be dropped in later behind a thin API layer.
+A **free, modern matrimony platform for the Marathi-speaking community**, built with React + Vite + Tailwind CSS. The app runs today on **mock data (localStorage)** — no backend required to demo it — and a matching **PHP + MySQL backend** (in `server/`, built for Hostinger Premium shared hosting) is included for going live.
 
 > This free initiative is inspired by **Nitin Kadam**, a social worker based in Pune (Parvati area). See the "Behind the Initiative" section on the home page.
 
@@ -9,14 +9,16 @@ A **free, modern matrimony platform for the Marathi-speaking community**, built 
 ## ✨ Features
 
 - **100% free** matrimony service — no fees, no subscriptions.
-- **Bilingual UI** (English + Marathi) with a one-click language toggle (i18next).
-- **Authentication** with role-based access (`user` / `admin`) — mock auth backed by localStorage.
+- **Marathi-first UI** — the entire interface is **Marathi by default**, with a one-click toggle to English (react-i18next). The choice is remembered.
+- **Authentication** with role-based access (`user` / `admin`).
 - **Registration** that creates both an account and a matrimonial profile.
 - **Profiles listing** with filters (gender, age, city, education) and pagination — protected (login required).
 - **Profile detail** pages with full information and photo carousel support.
 - **Admin dashboard** — create, edit and delete profiles.
 - **Admin bulk import** — paste a JSON array of profiles to add them in bulk.
 - **Change password** flow (also supports forced first-login change).
+- **Custom brand identity** — a Maharashtrian *mangalsutra* logo mark and favicon.
+- **PHP + MySQL backend** (`server/`) implementing the same API the frontend expects, ready for Hostinger Premium.
 - **Responsive, mobile-first** design with a deep-red brand theme and Devanagari typography.
 
 ---
@@ -29,10 +31,11 @@ A **free, modern matrimony platform for the Marathi-speaking community**, built 
 | Build tool | Vite 7 |
 | Styling | Tailwind CSS 4 (+ shadcn-style UI primitives) |
 | Routing | React Router 7 |
-| i18n | i18next / react-i18next |
-| HTTP client | Axios (ready for a real backend) |
+| i18n | i18next / react-i18next (Marathi default) |
+| HTTP client | Axios (ready for the backend) |
 | Dates | Day.js |
 | Icons | lucide-react |
+| Backend | PHP 8 + MySQL (dependency-free REST API, JWT auth) |
 
 ---
 
@@ -77,11 +80,16 @@ kadamvivah/
 ├── vite.config.js
 ├── postcss.config.js
 ├── public/
-│   └── images/              # hero + section imagery (see "Images" below)
+│   ├── logo-mark.svg  favicon.svg               # square mangalsutra mark
+│   ├── logo-horizontal.svg / -light.svg         # full lockups (light/dark)
+│   └── images/                                  # hero + section imagery
 ├── src/
 │   ├── main.jsx             # app entry; seeds mock data, inits i18n
 │   ├── App.jsx              # routes
-│   ├── i18n.js              # English/Marathi strings
+│   ├── i18n.js              # i18next init (Marathi default)
+│   ├── locales/
+│   │   ├── mr.js            # Marathi strings (default)
+│   │   └── en.js            # English strings
 │   ├── App.css / index.css  # Tailwind theme + globals
 │   ├── components/
 │   │   ├── Navbar.jsx  Footer.jsx  ProfileCard.jsx
@@ -90,7 +98,7 @@ kadamvivah/
 │   ├── contexts/
 │   │   └── AuthContext.jsx  # mock login/register/changePassword
 │   ├── lib/
-│   │   ├── api.js           # axios wrapper (documents the future API contract)
+│   │   ├── api.js           # axios wrapper (the API contract)
 │   │   ├── initMockData.js  # seeds localStorage from src/data
 │   │   └── utils.js         # cn() classname helper
 │   ├── data/
@@ -101,7 +109,26 @@ kadamvivah/
 │       ├── Profiles.jsx  ProfileDetail.jsx
 │       ├── Admin.jsx  AdminImport.jsx
 │       └── About.jsx  Contact.jsx  Privacy.jsx  Terms.jsx
+└── server/                  # PHP + MySQL backend (see server/README.md)
+    ├── index.php  helpers.php  db.php  config.example.php
+    ├── controllers/  sql/schema.sql  install.php  .htaccess
 ```
+
+---
+
+## 🌐 Language
+
+The UI defaults to **Marathi**; a toggle in the navbar switches to **English**, and the preference is stored in `localStorage`. All copy lives in `src/locales/mr.js` and `src/locales/en.js` — edit those to change wording or add strings. (The Privacy and Terms legal bodies are currently English pending a reviewed Marathi translation.)
+
+---
+
+## 🎨 Brand / Logo
+
+The logo is a stylised Maharashtrian **mangalsutra** (the Devanagari *shirorekha* bar + two gold *vati* + a heart), on the deep-red brand badge:
+
+- `public/logo-mark.svg` — square mark (navbar) · `public/favicon.svg` — tab icon
+- `public/logo-horizontal.svg` — full lockup for light backgrounds
+- `public/logo-horizontal-light.svg` — white/gold lockup for dark backgrounds
 
 ---
 
@@ -120,9 +147,21 @@ Home-page imagery lives in `public/images/`:
 - `AuthContext.jsx` implements `login`, `register` and `changePassword` against those localStorage collections (passwords are stripped from the user object exposed to the app).
 - Pages read/write the `mockProfiles` / `mockUsers` localStorage keys directly.
 
-### Connecting a real backend later
+---
 
-`src/lib/api.js` already documents the intended REST contract (`/auth/login`, `/auth/register`, `/profiles`, …) and attaches the auth token. To go live, replace the localStorage bodies in `AuthContext.jsx` and the pages with the corresponding `api.*` calls, and set `VITE_API_URL` in a `.env` file.
+## 🗄️ Backend (PHP + MySQL)
+
+A dependency-free PHP REST API lives in **`server/`**, built to run on **Hostinger Premium** shared hosting (PHP 8 + MySQL/MariaDB — no Node.js or MongoDB needed). It implements exactly the contract in `src/lib/api.js`:
+
+- `POST /auth/register` · `POST /auth/login` · `POST /auth/change-password` (JWT, HS256)
+- `GET /profiles` (filters + pagination) · `GET /profiles/{id}`
+- `POST/PUT/DELETE /profiles/{id}` and `POST /profiles/import` (admin only)
+
+Deploy steps, the DB schema, and a one-time browser installer are documented in **[`server/README.md`](server/README.md)**.
+
+### Connecting the frontend to it
+
+`src/lib/api.js` (axios) already attaches the auth token and points at `VITE_API_URL`. To go live, set `VITE_API_URL` (e.g. `https://your-domain.com/api`) in a `.env` file and replace the localStorage bodies in `AuthContext.jsx` and the pages with the corresponding `api.*` calls.
 
 ---
 
