@@ -1,0 +1,18 @@
+/**
+ * Global entry stylesheet.
+ *
+ * The Tailwind import, design tokens, base resets and the
+ * `.font-devanagari` helper all live in App.css (imported by App.jsx).
+ * This file is the first stylesheet loaded (from main.jsx) and is kept
+ * minimal on purpose so global overrides have a single, predictable home.
+ */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}

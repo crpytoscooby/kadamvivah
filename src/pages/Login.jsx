@@ -10,7 +10,7 @@ import { Mail, Lock, AlertCircle, Loader } from 'lucide-react';
  * Redirects to password change if mustChangePassword is true.
  */
 
-export default function Login() {
+export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -71,12 +71,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-accent to-background flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-amber-900 mb-2">KadamVivah</h1>
-          <p className="text-amber-700">Marathi Matrimony Platform</p>
+          <h1 className="text-4xl font-bold text-primary mb-2">KadamVivah</h1>
+          <p className="text-muted-foreground">Marathi Matrimony Platform</p>
         </div>
 
         {/* Card */}
@@ -108,7 +108,7 @@ export default function Login() {
                   onChange={handleChange}
                   placeholder="your@email.com"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
                   required
                 />
               </div>
@@ -129,7 +129,7 @@ export default function Login() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
                   required
                 />
               </div>
@@ -139,7 +139,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+              className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-400 text-primary-foreground font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -152,11 +152,36 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Info Message */}
+          {/* Demo credentials (mock mode) */}
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-700 text-sm">
-              <strong>Demo Account:</strong> Contact your administrator to get login credentials.
+            <p className="text-blue-800 text-sm font-semibold mb-2">Demo Accounts</p>
+            <p className="text-blue-700 text-xs mb-3">
+              This is a demo running on sample data. Click a role to auto-fill, then press Login.
             </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() =>
+                  setFormData({ email: 'admin@kadamvivah.in', password: 'admin123' })
+                }
+                className="flex-1 text-left px-3 py-2 bg-white border border-blue-200 rounded-md hover:bg-blue-100 transition disabled:opacity-50"
+              >
+                <span className="block text-xs font-semibold text-blue-900">Admin</span>
+                <span className="block text-[11px] text-blue-600">admin@kadamvivah.in</span>
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() =>
+                  setFormData({ email: 'test@example.com', password: 'test123' })
+                }
+                className="flex-1 text-left px-3 py-2 bg-white border border-blue-200 rounded-md hover:bg-blue-100 transition disabled:opacity-50"
+              >
+                <span className="block text-xs font-semibold text-blue-900">User</span>
+                <span className="block text-[11px] text-blue-600">test@example.com</span>
+              </button>
+            </div>
           </div>
         </div>
 

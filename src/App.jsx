@@ -12,6 +12,7 @@ import { Profiles } from './pages/Profiles';
 import { ProfileDetail } from './pages/ProfileDetail';
 import { Admin } from './pages/Admin';
 import { AdminImport } from './pages/AdminImport';
+import { ChangePassword } from './pages/ChangePassword';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
@@ -61,6 +62,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfileDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/change-password"
+                element={
+                  <ProtectedRoute>
+                    <ChangePassword />
                   </ProtectedRoute>
                 }
               />

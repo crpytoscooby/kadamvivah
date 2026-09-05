@@ -82,18 +82,20 @@ export const Admin = () => {
     if (editingProfile) {
       const index = mockProfiles.findIndex(p => p.id === editingProfile.id);
       if (index !== -1) {
-        mockProfiles[index] = { ...editingProfile, ...formData };
+        const { fatherName, motherName, siblings, ...rest } = formData;
+        mockProfiles[index] = {
+          ...editingProfile,
+          ...rest,
+          familyDetails: { fatherName, motherName, siblings }
+        };
       }
       showToast('Profile updated successfully', 'success');
     } else {
+      const { fatherName, motherName, siblings, ...rest } = formData;
       const newProfile = {
         id: 'profile-' + Date.now(),
-        ...formData,
-        familyDetails: {
-          fatherName: formData.fatherName,
-          motherName: formData.motherName,
-          siblings: formData.siblings
-        },
+        ...rest,
+        familyDetails: { fatherName, motherName, siblings },
         photos: [],
         createdAt: new Date().toISOString()
       };
