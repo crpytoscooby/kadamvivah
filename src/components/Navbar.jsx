@@ -34,11 +34,12 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-primary">KadamVivah</span>
-              <span className="ml-2 px-2 py-1 bg-primary text-primary-foreground rounded text-sm font-devanagari font-semibold">
-                कद
+          <Link to="/" className="flex items-center gap-2.5" aria-label="KadamVivah home">
+            <img src="/logo-mark.svg" alt="" className="w-9 h-9 shrink-0" />
+            <div className="flex flex-col leading-none">
+              <span className="text-xl font-bold text-primary">KadamVivah</span>
+              <span className="text-[11px] text-muted-foreground font-devanagari">
+                कदमविवाह
               </span>
             </div>
           </Link>
