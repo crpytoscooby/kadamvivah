@@ -12,17 +12,13 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center space-x-2 mb-3">
-              <span className="text-xl font-bold text-primary">KadamVivah</span>
-              <span className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs font-devanagari font-semibold">
-                कद
-              </span>
-            </div>
+            <img
+              src="/logo-horizontal.svg"
+              alt="KadamVivah — मोफत मराठी विवाह सेवा"
+              className="h-12 w-auto mb-3"
+            />
             <p className="text-sm text-muted-foreground">
               Free Marathi matrimony service connecting families with trust and respect.
-            </p>
-            <p className="text-sm text-muted-foreground mt-2 font-devanagari">
-              विनामूल्य मराठी विवाह सेवा
             </p>
           </div>
 
