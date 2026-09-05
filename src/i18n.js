@@ -36,8 +36,9 @@ const resources = {
   },
 };
 
+// Default the UI to Marathi; a returning visitor's saved choice wins.
 const savedLanguage =
-  (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'en';
+  (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'mr';
 
 i18n.use(initReactI18next).init({
   resources,
