@@ -1,0 +1,21 @@
+# Route every request to index.php (front controller).
+# Works on Hostinger's Apache/LiteSpeed with mod_rewrite enabled.
+
+RewriteEngine On
+
+# Pass the Authorization header through to PHP (some setups strip it).
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Send everything that is not a real file/directory to index.php.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+# Never serve secrets or SQL directly.
+<FilesMatch "^(config\.php|config\.local\.php|config\.example\.php)$">
+  Require all denied
+</FilesMatch>
+<FilesMatch "\.(sql|md)$">
+  Require all denied
+</FilesMatch>

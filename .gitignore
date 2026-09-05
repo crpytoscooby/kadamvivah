@@ -11,6 +11,9 @@ dist-ssr/
 .env.*
 !.env.example
 
+# Backend secrets (PHP)
+server/config.local.php
+
 # Logs
 logs/
 *.log
