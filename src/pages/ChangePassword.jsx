@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -14,6 +15,7 @@ import { Lock, AlertCircle, Loader } from 'lucide-react';
  * and as a normal "update password" screen for signed-in users.
  */
 export const ChangePassword = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { changePassword, mustChangePassword } = useAuth();
 
@@ -35,15 +37,15 @@ export const ChangePassword = () => {
     setError('');
 
     if (!form.oldPassword || !form.newPassword || !form.confirmPassword) {
-      setError('Please fill in all fields');
+      setError(t('changePassword.errAll'));
       return;
     }
     if (form.newPassword.length < 6) {
-      setError('New password must be at least 6 characters');
+      setError(t('changePassword.errLen'));
       return;
     }
     if (form.newPassword !== form.confirmPassword) {
-      setError('New passwords do not match');
+      setError(t('changePassword.errMatch'));
       return;
     }
 
@@ -52,7 +54,7 @@ export const ChangePassword = () => {
       await changePassword(form.oldPassword, form.newPassword, form.confirmPassword);
       navigate('/profiles');
     } catch (err) {
-      setError(err.message || 'Could not change password. Please try again.');
+      setError(err.message || t('changePassword.errFailed'));
     } finally {
       setLoading(false);
     }
@@ -65,12 +67,12 @@ export const ChangePassword = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="w-5 h-5 text-primary" />
-              Change Password
+              {t('changePassword.title')}
             </CardTitle>
             <CardDescription>
               {mustChangePassword
-                ? 'For your security, please set a new password before continuing.'
-                : 'Update the password for your account.'}
+                ? t('changePassword.descForced')
+                : t('changePassword.descNormal')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -83,7 +85,7 @@ export const ChangePassword = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="oldPassword">Current Password</Label>
+                <Label htmlFor="oldPassword">{t('changePassword.current')}</Label>
                 <Input
                   id="oldPassword"
                   name="oldPassword"
@@ -95,7 +97,7 @@ export const ChangePassword = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{t('changePassword.new')}</Label>
                 <Input
                   id="newPassword"
                   name="newPassword"
@@ -107,7 +109,7 @@ export const ChangePassword = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword">{t('changePassword.confirm')}</Label>
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -122,10 +124,10 @@ export const ChangePassword = () => {
                 {loading ? (
                   <>
                     <Loader className="w-4 h-4 mr-2 animate-spin" />
-                    Updating…
+                    {t('changePassword.submitting')}
                   </>
                 ) : (
-                  'Update Password'
+                  t('changePassword.submit')
                 )}
               </Button>
             </form>

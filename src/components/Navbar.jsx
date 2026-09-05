@@ -21,7 +21,7 @@ export const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -47,13 +47,13 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/" className="text-foreground hover:text-primary transition-colors">
-              {t('home')}
+              {t('nav.home')}
             </Link>
             <Link to="/about" className="text-foreground hover:text-primary transition-colors">
-              {t('about')}
+              {t('nav.about')}
             </Link>
             <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
-              {t('contact')}
+              {t('nav.contact')}
             </Link>
             
             <LanguageToggle />
@@ -61,19 +61,19 @@ export const Navbar = () => {
             {isAuthenticated() ? (
               <>
                 <Link to="/profiles">
-                  <Button variant="ghost">Profiles</Button>
+                  <Button variant="ghost">{t('nav.profiles')}</Button>
                 </Link>
                 {isAdmin() && (
                   <>
                     <Link to="/admin">
                       <Button variant="ghost" size="sm">
                         <UserCog className="w-4 h-4 mr-2" />
-                        {t('admin')}
+                        {t('nav.admin')}
                       </Button>
                     </Link>
                     <Link to="/admin/import">
                       <Button variant="ghost" size="sm">
-                        Import
+                        {t('nav.import')}
                       </Button>
                     </Link>
                   </>
@@ -84,17 +84,17 @@ export const Navbar = () => {
                   </span>
                   <Button variant="outline" size="sm" onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" />
-                    Logout
+                    {t('nav.logout')}
                   </Button>
                 </div>
               </>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outline">{t('login')}</Button>
+                  <Button variant="outline">{t('nav.login')}</Button>
                 </Link>
                 <Link to="/register">
-                  <Button>{t('register')}</Button>
+                  <Button>{t('nav.register')}</Button>
                 </Link>
               </>
             )}
@@ -119,21 +119,21 @@ export const Navbar = () => {
                 className="px-3 py-2 rounded-md hover:bg-accent transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Home
+                {t('nav.home')}
               </Link>
               <Link
                 to="/about"
                 className="px-3 py-2 rounded-md hover:bg-accent transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                About
+                {t('nav.about')}
               </Link>
               <Link
                 to="/contact"
                 className="px-3 py-2 rounded-md hover:bg-accent transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Contact
+                {t('nav.contact')}
               </Link>
 
               {isAuthenticated() ? (
@@ -143,7 +143,7 @@ export const Navbar = () => {
                     className="px-3 py-2 rounded-md hover:bg-accent transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Profiles
+                    {t('nav.profiles')}
                   </Link>
                   {isAdmin() && (
                     <Link
@@ -152,26 +152,26 @@ export const Navbar = () => {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <UserCog className="w-4 h-4 mr-2" />
-                      Admin
+                      {t('nav.admin')}
                     </Link>
                   )}
                   <div className="px-3 py-2 text-sm text-muted-foreground border-t border-border mt-2 pt-3">
-                    Logged in as: {user?.firstName} {user?.lastName}
+                    {t('nav.loggedInAs')} {user?.firstName} {user?.lastName}
                   </div>
                   <Button variant="outline" onClick={handleLogout} className="mx-3">
                     <LogOut className="w-4 h-4 mr-2" />
-                    Logout
+                    {t('nav.logout')}
                   </Button>
                 </>
               ) : (
                 <>
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="outline" className="w-full">
-                      Login
+                      {t('nav.login')}
                     </Button>
                   </Link>
                   <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full">Register</Button>
+                    <Button className="w-full">{t('nav.register')}</Button>
                   </Link>
                 </>
               )}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -31,6 +32,7 @@ import dayjs from 'dayjs';
  */
 
 export const ProfileDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast, ToastContainer } = useToast();
@@ -55,15 +57,15 @@ export const ProfileDetail = () => {
       const foundProfile = mockProfiles.find(p => p.id === id);
       
       if (!foundProfile) {
-        showToast('Profile not found', 'error');
+        showToast(t('profileDetail.notFound'), 'error');
         navigate('/profiles');
         return;
       }
-      
+
       setProfile(foundProfile);
     } catch (error) {
       console.error('Error fetching profile:', error);
-      showToast('Failed to load profile', 'error');
+      showToast(t('profileDetail.loadFailed'), 'error');
       navigate('/profiles');
     } finally {
       setLoading(false);
@@ -115,7 +117,7 @@ export const ProfileDetail = () => {
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Profiles
+          {t('profileDetail.back')}
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -184,7 +186,7 @@ export const ProfileDetail = () => {
               <div className="flex items-center gap-4 text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {age} years
+                  {t('profileDetail.years', { count: age })}
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
@@ -196,18 +198,18 @@ export const ProfileDetail = () => {
             {/* Basic Details */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Basic Details</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('profileDetail.basic')}</h2>
                 <dl className="space-y-3">
                   <div className="flex justify-between py-2 border-b border-border">
-                    <dt className="text-muted-foreground">Gender</dt>
+                    <dt className="text-muted-foreground">{t('profileDetail.gender')}</dt>
                     <dd className="font-medium capitalize">{profile.gender}</dd>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
-                    <dt className="text-muted-foreground">Date of Birth</dt>
+                    <dt className="text-muted-foreground">{t('profileDetail.dob')}</dt>
                     <dd className="font-medium">{dayjs(profile.dob).format('DD MMM YYYY')}</dd>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
-                    <dt className="text-muted-foreground">Caste</dt>
+                    <dt className="text-muted-foreground">{t('profileDetail.caste')}</dt>
                     <dd className="font-medium">
                       {profile.caste}
                       {profile.subCaste && ` • ${profile.subCaste}`}
@@ -220,19 +222,19 @@ export const ProfileDetail = () => {
             {/* Education & Career */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Education & Career</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('profileDetail.eduCareer')}</h2>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <GraduationCap className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Education</p>
+                      <p className="text-sm text-muted-foreground">{t('profileDetail.education')}</p>
                       <p className="font-medium">{profile.education}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Briefcase className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Occupation</p>
+                      <p className="text-sm text-muted-foreground">{t('profileDetail.occupation')}</p>
                       <p className="font-medium">{profile.occupation}</p>
                     </div>
                   </div>
@@ -240,7 +242,7 @@ export const ProfileDetail = () => {
                     <div className="flex items-start gap-3">
                       <DollarSign className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Annual Income</p>
+                        <p className="text-sm text-muted-foreground">{t('profileDetail.annualIncome')}</p>
                         <p className="font-medium">{profile.annualIncome}</p>
                       </div>
                     </div>
@@ -255,24 +257,24 @@ export const ProfileDetail = () => {
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <Users className="w-5 h-5" />
-                    Family Details
+                    {t('profileDetail.family')}
                   </h2>
                   <dl className="space-y-3">
                     {profile.familyDetails.fatherName && (
                       <div className="flex justify-between py-2 border-b border-border">
-                        <dt className="text-muted-foreground">Father's Name</dt>
+                        <dt className="text-muted-foreground">{t('profileDetail.fatherName')}</dt>
                         <dd className="font-medium">{profile.familyDetails.fatherName}</dd>
                       </div>
                     )}
                     {profile.familyDetails.motherName && (
                       <div className="flex justify-between py-2 border-b border-border">
-                        <dt className="text-muted-foreground">Mother's Name</dt>
+                        <dt className="text-muted-foreground">{t('profileDetail.motherName')}</dt>
                         <dd className="font-medium">{profile.familyDetails.motherName}</dd>
                       </div>
                     )}
                     {profile.familyDetails.siblings && (
                       <div className="flex justify-between py-2 border-b border-border">
-                        <dt className="text-muted-foreground">Siblings</dt>
+                        <dt className="text-muted-foreground">{t('profileDetail.siblings')}</dt>
                         <dd className="font-medium">{profile.familyDetails.siblings}</dd>
                       </div>
                     )}
@@ -285,7 +287,7 @@ export const ProfileDetail = () => {
             {profile.bio && (
               <Card>
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">About</h2>
+                  <h2 className="text-xl font-semibold mb-4">{t('profileDetail.about')}</h2>
                   <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
                 </CardContent>
               </Card>
@@ -294,12 +296,12 @@ export const ProfileDetail = () => {
             {/* Contact Details */}
             <Card className="border-primary/20 bg-primary/5">
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Contact Details</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('profileDetail.contact')}</h2>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-primary flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="text-sm text-muted-foreground">{t('profileDetail.email')}</p>
                       <a 
                         href={`mailto:${profile.email}`}
                         className="font-medium text-primary hover:underline"
@@ -311,7 +313,7 @@ export const ProfileDetail = () => {
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-primary flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="text-sm text-muted-foreground">{t('profileDetail.phone')}</p>
                       <a 
                         href={`tel:${profile.phone}`}
                         className="font-medium text-primary hover:underline"
@@ -322,7 +324,7 @@ export const ProfileDetail = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-4">
-                  Note: Contact details are visible to all registered users
+                  {t('profileDetail.contactNote')}
                 </p>
               </CardContent>
             </Card>

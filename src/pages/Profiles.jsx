@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProfileCard } from '../components/ProfileCard';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -20,6 +21,7 @@ import api from '../lib/api';
  */
 
 export const Profiles = () => {
+  const { t } = useTranslation();
   const { showToast, ToastContainer } = useToast();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +91,7 @@ export const Profiles = () => {
       setPagination(prev => ({ ...prev, total, totalPages }));
     } catch (error) {
       console.error('Error fetching profiles:', error);
-      showToast('Failed to load profiles', 'error');
+      showToast(t('profiles.loadFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -128,8 +130,7 @@ export const Profiles = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Browse Profiles</h1>
-          <p className="text-muted-foreground font-devanagari">प्रोफाइल पहा</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('profiles.title')}</h1>
         </div>
 
         {/* Filters */}
@@ -141,18 +142,18 @@ export const Profiles = () => {
                 className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
               >
                 <Filter className="w-5 h-5" />
-                <span className="font-semibold">Filters</span>
+                <span className="font-semibold">{t('profiles.filters')}</span>
                 {hasActiveFilters && (
                   <span className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full">
-                    Active
+                    {t('profiles.active')}
                   </span>
                 )}
               </button>
-              
+
               {hasActiveFilters && (
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   <X className="w-4 h-4 mr-2" />
-                  Clear All
+                  {t('profiles.clearAll')}
                 </Button>
               )}
             </div>
@@ -160,7 +161,7 @@ export const Profiles = () => {
             {filtersOpen && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-border animate-in slide-in-from-top">
                 <div className="space-y-2">
-                  <Label htmlFor="gender">Gender</Label>
+                  <Label htmlFor="gender">{t('profiles.gender')}</Label>
                   <select
                     id="gender"
                     name="gender"
@@ -168,37 +169,37 @@ export const Profiles = () => {
                     onChange={handleFilterChange}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >
-                    <option value="">All</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="">{t('common.all')}</option>
+                    <option value="male">{t('common.male')}</option>
+                    <option value="female">{t('common.female')}</option>
+                    <option value="other">{t('common.other')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">{t('profiles.city')}</Label>
                   <Input
                     id="city"
                     name="city"
-                    placeholder="Search by city"
+                    placeholder={t('profiles.cityPh')}
                     value={filters.city}
                     onChange={handleFilterChange}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="education">Education</Label>
+                  <Label htmlFor="education">{t('profiles.education')}</Label>
                   <Input
                     id="education"
                     name="education"
-                    placeholder="Search by education"
+                    placeholder={t('profiles.educationPh')}
                     value={filters.education}
                     onChange={handleFilterChange}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dobFrom">Age Range</Label>
+                  <Label htmlFor="dobFrom">{t('profiles.ageRange')}</Label>
                   <div className="flex gap-2">
                     <Input
                       id="dobFrom"
@@ -218,11 +219,11 @@ export const Profiles = () => {
         {/* Results Count */}
         <div className="mb-4 text-sm text-muted-foreground">
           {loading ? (
-            'Loading profiles...'
+            t('profiles.loading')
           ) : (
             <>
-              Showing {profiles.length} of {pagination.total} profiles
-              {hasActiveFilters && ' (filtered)'}
+              {t('profiles.showing', { count: profiles.length, total: pagination.total })}
+              {hasActiveFilters && ` ${t('profiles.filtered')}`}
             </>
           )}
         </div>
@@ -235,13 +236,10 @@ export const Profiles = () => {
         ) : profiles.length === 0 ? (
           <Card className="py-20">
             <CardContent className="text-center">
-              <p className="text-lg text-muted-foreground mb-2">No profiles found</p>
-              <p className="text-sm text-muted-foreground mb-4 font-devanagari">
-                कोणतेही प्रोफाइल आढळले नाहीत
-              </p>
+              <p className="text-lg text-muted-foreground mb-4">{t('profiles.noneTitle')}</p>
               {hasActiveFilters && (
                 <Button onClick={clearFilters} variant="outline">
-                  Clear Filters
+                  {t('profiles.clearFilters')}
                 </Button>
               )}
             </CardContent>
@@ -264,7 +262,7 @@ export const Profiles = () => {
                   disabled={pagination.page === 1}
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  Previous
+                  {t('profiles.previous')}
                 </Button>
 
                 <div className="flex items-center gap-2">
@@ -301,7 +299,7 @@ export const Profiles = () => {
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.totalPages}
                 >
-                  Next
+                  {t('profiles.next')}
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>

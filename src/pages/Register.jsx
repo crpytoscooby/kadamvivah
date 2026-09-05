@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -25,6 +26,7 @@ import dayjs from 'dayjs';
  */
 
 export const Register = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register } = useAuth();
   const { showToast, ToastContainer } = useToast();
@@ -63,63 +65,63 @@ export const Register = () => {
     const newErrors = {};
 
     // Required text fields
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    
+    if (!formData.firstName.trim()) newErrors.firstName = t('register.errFirstName');
+    if (!formData.lastName.trim()) newErrors.lastName = t('register.errLastName');
+
     // Email
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('register.errEmailReq');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = t('register.errEmailValid');
     }
 
     // Phone
     if (!formData.phone) {
-      newErrors.phone = 'Phone number is required';
+      newErrors.phone = t('register.errPhoneReq');
     } else if (!/^\d{10}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Please enter a valid 10-digit phone number';
+      newErrors.phone = t('register.errPhoneValid');
     }
 
     // Password
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('register.errPasswordReq');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = t('register.errPasswordLen');
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('register.errConfirm');
     }
 
     // DOB - must be 18+
     if (!formData.dob) {
-      newErrors.dob = 'Date of birth is required';
+      newErrors.dob = t('register.errDobReq');
     } else {
       const age = dayjs().diff(dayjs(formData.dob), 'year');
       if (age < 18) {
-        newErrors.dob = 'You must be at least 18 years old';
+        newErrors.dob = t('register.errAge');
       }
     }
 
     // Location
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
+    if (!formData.city.trim()) newErrors.city = t('register.errCity');
+    if (!formData.state.trim()) newErrors.state = t('register.errState');
     if (!formData.pincode) {
-      newErrors.pincode = 'Pincode is required';
+      newErrors.pincode = t('register.errPincodeReq');
     } else if (!/^\d{6}$/.test(formData.pincode)) {
-      newErrors.pincode = 'Please enter a valid 6-digit pincode';
+      newErrors.pincode = t('register.errPincodeValid');
     }
 
     // Community
-    if (!formData.caste.trim()) newErrors.caste = 'Caste is required';
+    if (!formData.caste.trim()) newErrors.caste = t('register.errCaste');
 
     // Education & occupation
-    if (!formData.education.trim()) newErrors.education = 'Education is required';
-    if (!formData.occupation.trim()) newErrors.occupation = 'Occupation is required';
+    if (!formData.education.trim()) newErrors.education = t('register.errEducation');
+    if (!formData.occupation.trim()) newErrors.occupation = t('register.errOccupation');
 
     // Terms
     if (!formData.acceptTerms) {
-      newErrors.acceptTerms = 'You must accept the terms and conditions';
+      newErrors.acceptTerms = t('register.errTerms');
     }
 
     setErrors(newErrors);
@@ -157,7 +159,7 @@ export const Register = () => {
     e.preventDefault();
     
     if (!validateForm()) {
-      showToast('Please fix the errors in the form', 'error');
+      showToast(t('register.toastFix'), 'error');
       return;
     }
 
@@ -177,12 +179,12 @@ export const Register = () => {
       };
 
       await register(registrationData);
-      showToast('Registration successful! Redirecting to profiles...', 'success');
+      showToast(t('register.toastSuccess'), 'success');
       setTimeout(() => {
         navigate('/profiles');
       }, 1500);
     } catch (error) {
-      showToast(error.message || 'Registration failed. Please try again.', 'error');
+      showToast(error.message || t('register.toastFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -203,33 +205,28 @@ export const Register = () => {
       
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Create Your Profile</h1>
-          <p className="text-muted-foreground font-devanagari">आपले प्रोफाइल तयार करा</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            It's completely <span className="font-semibold text-primary">free</span> • विनामूल्य
-          </p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('register.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-2">{t('register.subtitle')}</p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="w-5 h-5" />
-              Registration Form
+              {t('register.cardTitle')}
             </CardTitle>
-            <CardDescription>
-              Fill in your details to create a matrimonial profile
-            </CardDescription>
+            <CardDescription>{t('register.cardDesc')}</CardDescription>
           </CardHeader>
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Personal Information</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secPersonal')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name *</Label>
+                    <Label htmlFor="firstName">{t('register.firstName')} *</Label>
                     <Input
                       id="firstName"
                       name="firstName"
@@ -241,7 +238,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="middleName">Middle Name</Label>
+                    <Label htmlFor="middleName">{t('register.middleName')}</Label>
                     <Input
                       id="middleName"
                       name="middleName"
@@ -251,7 +248,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Label htmlFor="lastName">{t('register.lastName')} *</Label>
                     <Input
                       id="lastName"
                       name="lastName"
@@ -265,7 +262,7 @@ export const Register = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="dob">Date of Birth * (Must be 18+)</Label>
+                    <Label htmlFor="dob">{t('register.dob')} *</Label>
                     <Input
                       id="dob"
                       name="dob"
@@ -279,7 +276,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="gender">Gender *</Label>
+                    <Label htmlFor="gender">{t('register.gender')} *</Label>
                     <select
                       id="gender"
                       name="gender"
@@ -287,9 +284,9 @@ export const Register = () => {
                       onChange={handleChange}
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
+                      <option value="male">{t('common.male')}</option>
+                      <option value="female">{t('common.female')}</option>
+                      <option value="other">{t('common.other')}</option>
                     </select>
                   </div>
                 </div>
@@ -297,11 +294,11 @@ export const Register = () => {
 
               {/* Contact Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Contact Information</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secContact')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">{t('register.email')} *</Label>
                     <Input
                       id="email"
                       name="email"
@@ -314,7 +311,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number * (10 digits)</Label>
+                    <Label htmlFor="phone">{t('register.phone')} *</Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -331,11 +328,11 @@ export const Register = () => {
 
               {/* Password */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Create Password</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secPassword')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password * (min 6 characters)</Label>
+                    <Label htmlFor="password">{t('register.password')} *</Label>
                     <Input
                       id="password"
                       name="password"
@@ -346,14 +343,14 @@ export const Register = () => {
                     />
                     {passwordStrength && (
                       <p className={`text-sm ${getPasswordStrengthColor()}`}>
-                        Strength: {passwordStrength}
+                        {t('register.strength')}: {t(`register.strength${passwordStrength}`)}
                       </p>
                     )}
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                    <Label htmlFor="confirmPassword">{t('register.confirmPassword')} *</Label>
                     <Input
                       id="confirmPassword"
                       name="confirmPassword"
@@ -369,11 +366,11 @@ export const Register = () => {
 
               {/* Location */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Location</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secLocation')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
+                    <Label htmlFor="city">{t('register.city')} *</Label>
                     <Input
                       id="city"
                       name="city"
@@ -385,7 +382,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="state">State *</Label>
+                    <Label htmlFor="state">{t('register.state')} *</Label>
                     <Input
                       id="state"
                       name="state"
@@ -397,7 +394,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pincode">Pincode * (6 digits)</Label>
+                    <Label htmlFor="pincode">{t('register.pincode')} *</Label>
                     <Input
                       id="pincode"
                       name="pincode"
@@ -412,11 +409,11 @@ export const Register = () => {
 
               {/* Community */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Community</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secCommunity')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="caste">Caste *</Label>
+                    <Label htmlFor="caste">{t('register.caste')} *</Label>
                     <Input
                       id="caste"
                       name="caste"
@@ -428,7 +425,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="subCaste">Sub-caste (optional)</Label>
+                    <Label htmlFor="subCaste">{t('register.subCaste')}</Label>
                     <Input
                       id="subCaste"
                       name="subCaste"
@@ -441,15 +438,15 @@ export const Register = () => {
 
               {/* Education & Occupation */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Education & Occupation</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secEducation')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="education">Education *</Label>
+                    <Label htmlFor="education">{t('register.education')} *</Label>
                     <Input
                       id="education"
                       name="education"
-                      placeholder="e.g., Bachelor's in Engineering"
+                      placeholder={t('register.educationPh')}
                       value={formData.education}
                       onChange={handleChange}
                       className={errors.education ? 'border-destructive' : ''}
@@ -458,11 +455,11 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="occupation">Occupation *</Label>
+                    <Label htmlFor="occupation">{t('register.occupation')} *</Label>
                     <Input
                       id="occupation"
                       name="occupation"
-                      placeholder="e.g., Software Engineer"
+                      placeholder={t('register.occupationPh')}
                       value={formData.occupation}
                       onChange={handleChange}
                       className={errors.occupation ? 'border-destructive' : ''}
@@ -472,11 +469,11 @@ export const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="annualIncome">Annual Income (optional)</Label>
+                  <Label htmlFor="annualIncome">{t('register.annualIncome')}</Label>
                   <Input
                     id="annualIncome"
                     name="annualIncome"
-                    placeholder="e.g., 5-7 Lakhs"
+                    placeholder={t('register.annualIncomePh')}
                     value={formData.annualIncome}
                     onChange={handleChange}
                   />
@@ -485,11 +482,11 @@ export const Register = () => {
 
               {/* Family Details */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Family Details</h3>
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secFamily')}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fatherName">Father's Name</Label>
+                    <Label htmlFor="fatherName">{t('register.fatherName')}</Label>
                     <Input
                       id="fatherName"
                       name="fatherName"
@@ -499,7 +496,7 @@ export const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="motherName">Mother's Name</Label>
+                    <Label htmlFor="motherName">{t('register.motherName')}</Label>
                     <Input
                       id="motherName"
                       name="motherName"
@@ -510,11 +507,11 @@ export const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="siblings">Siblings</Label>
+                  <Label htmlFor="siblings">{t('register.siblings')}</Label>
                   <Input
                     id="siblings"
                     name="siblings"
-                    placeholder="e.g., 1 brother, 1 sister"
+                    placeholder={t('register.siblingsPh')}
                     value={formData.siblings}
                     onChange={handleChange}
                   />
@@ -523,15 +520,15 @@ export const Register = () => {
 
               {/* Bio */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">About You</h3>
-                
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secAbout')}</h3>
+
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Bio / About Yourself</Label>
+                  <Label htmlFor="bio">{t('register.bio')}</Label>
                   <Textarea
                     id="bio"
                     name="bio"
                     rows={4}
-                    placeholder="Tell us about yourself, your interests, and what you're looking for in a partner..."
+                    placeholder={t('register.bioPh')}
                     value={formData.bio}
                     onChange={handleChange}
                   />
@@ -540,16 +537,12 @@ export const Register = () => {
 
               {/* Photos */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Photos</h3>
-                
+                <h3 className="text-lg font-semibold border-b pb-2">{t('register.secPhotos')}</h3>
+
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                   <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Photo upload will be available after registration
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Note: Image upload uses cloud storage in production
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('register.photosNote')}</p>
+                  <p className="text-xs text-muted-foreground">{t('register.photosSub')}</p>
                 </div>
               </div>
 
@@ -565,13 +558,13 @@ export const Register = () => {
                     className="mt-1"
                   />
                   <Label htmlFor="acceptTerms" className="font-normal cursor-pointer">
-                    I accept the{' '}
+                    {t('register.acceptPre')}{' '}
                     <Link to="/terms" className="text-primary hover:underline" target="_blank">
-                      Terms and Conditions
+                      {t('register.terms')}
                     </Link>{' '}
-                    and{' '}
+                    {t('register.and')}{' '}
                     <Link to="/privacy" className="text-primary hover:underline" target="_blank">
-                      Privacy Policy
+                      {t('register.privacy')}
                     </Link>
                     *
                   </Label>
@@ -588,21 +581,21 @@ export const Register = () => {
                     className="mt-1"
                   />
                   <Label htmlFor="optInNewsletter" className="font-normal cursor-pointer">
-                    Send me updates and newsletters (optional)
+                    {t('register.newsletter')}
                   </Label>
                 </div>
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? 'Creating Account...' : 'Create Free Account'}
+                {loading ? t('register.submitting') : t('register.submit')}
               </Button>
             </form>
 
             <div className="mt-6 text-center text-sm">
               <p className="text-muted-foreground">
-                Already have an account?{' '}
+                {t('register.haveAccount')}{' '}
                 <Link to="/login" className="text-primary hover:underline font-semibold">
-                  Login here
+                  {t('register.loginHere')}
                 </Link>
               </p>
             </div>

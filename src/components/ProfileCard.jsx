@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MapPin, GraduationCap, Briefcase, Calendar } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import dayjs from 'dayjs';
@@ -11,6 +12,7 @@ import dayjs from 'dayjs';
  */
 
 export const ProfileCard = ({ profile }) => {
+  const { t } = useTranslation();
   const calculateAge = (dob) => {
     return dayjs().diff(dayjs(dob), 'year');
   };
@@ -40,7 +42,7 @@ export const ProfileCard = ({ profile }) => {
           
           <div className="flex items-center text-sm text-muted-foreground mb-3">
             <Calendar className="w-4 h-4 mr-1" />
-            <span>{age} years</span>
+            <span>{t('profileCard.years', { count: age })}</span>
           </div>
 
           <div className="space-y-2 text-sm">

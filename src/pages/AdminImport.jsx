@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -28,6 +29,7 @@ const SAMPLE = `[
 ]`;
 
 export const AdminImport = () => {
+  const { t } = useTranslation();
   const { showToast, ToastContainer } = useToast();
   const [raw, setRaw] = useState('');
   const [error, setError] = useState('');
@@ -40,16 +42,16 @@ export const AdminImport = () => {
     try {
       parsed = JSON.parse(raw);
     } catch {
-      setError('Invalid JSON. Please paste a valid JSON array of profiles.');
+      setError(t('adminImport.errInvalid'));
       return;
     }
 
     if (!Array.isArray(parsed)) {
-      setError('Expected a JSON array of profile objects.');
+      setError(t('adminImport.errArray'));
       return;
     }
     if (parsed.length === 0) {
-      setError('The array is empty — nothing to import.');
+      setError(t('adminImport.errEmpty'));
       return;
     }
 
@@ -69,7 +71,7 @@ export const AdminImport = () => {
 
     setImporting(false);
     setRaw('');
-    showToast(`Imported ${prepared.length} profile(s) successfully`, 'success');
+    showToast(t('adminImport.success', { count: prepared.length }), 'success');
   };
 
   return (
@@ -79,22 +81,18 @@ export const AdminImport = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
           <Upload className="w-7 h-7 text-primary" />
-          Import Profiles
+          {t('adminImport.title')}
         </h1>
-        <p className="text-muted-foreground mt-2">
-          Bulk-add profiles to the platform. Paste a JSON array below.
-        </p>
+        <p className="text-muted-foreground mt-2">{t('adminImport.subtitle')}</p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileJson className="w-5 h-5" />
-            JSON import
+            {t('adminImport.cardTitle')}
           </CardTitle>
-          <CardDescription>
-            Each object should include at least firstName, lastName, gender, dob, city and state.
-          </CardDescription>
+          <CardDescription>{t('adminImport.cardDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Textarea
@@ -114,19 +112,17 @@ export const AdminImport = () => {
 
           <div className="flex items-center gap-3">
             <Button onClick={handleImport} disabled={importing || !raw.trim()}>
-              {importing ? 'Importing…' : 'Import profiles'}
+              {importing ? t('adminImport.importing') : t('adminImport.importBtn')}
             </Button>
             <Button variant="outline" onClick={() => setRaw(SAMPLE)}>
-              Load sample
+              {t('adminImport.loadSample')}
             </Button>
           </div>
         </CardContent>
       </Card>
 
       <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-        <strong>Note:</strong> This is a mock importer that writes to localStorage. To import from
-        Excel in production, wire this screen to the backend endpoint powered by{' '}
-        <code>tools/importExcelToMongo.js</code>.
+        {t('adminImport.note')}
       </div>
     </div>
   );

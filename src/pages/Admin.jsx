@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -22,6 +23,7 @@ import dayjs from 'dayjs';
  */
 
 export const Admin = () => {
+  const { t } = useTranslation();
   const { showToast, ToastContainer } = useToast();
   const [profiles, setProfiles] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -89,7 +91,7 @@ export const Admin = () => {
           familyDetails: { fatherName, motherName, siblings }
         };
       }
-      showToast('Profile updated successfully', 'success');
+      showToast(t('admin.toastUpdated'), 'success');
     } else {
       const { fatherName, motherName, siblings, ...rest } = formData;
       const newProfile = {
@@ -100,7 +102,7 @@ export const Admin = () => {
         createdAt: new Date().toISOString()
       };
       mockProfiles.push(newProfile);
-      showToast('Profile added successfully', 'success');
+      showToast(t('admin.toastAdded'), 'success');
     }
     
     localStorage.setItem('mockProfiles', JSON.stringify(mockProfiles));
@@ -135,7 +137,7 @@ export const Admin = () => {
   };
 
   const handleDelete = (profileId) => {
-    if (!confirm('Are you sure you want to delete this profile?')) {
+    if (!confirm(t('admin.confirmDelete'))) {
       return;
     }
 
@@ -147,7 +149,7 @@ export const Admin = () => {
     const filtered = mockProfiles.filter(p => p.id !== profileId);
     localStorage.setItem('mockProfiles', JSON.stringify(filtered));
     loadProfiles();
-    showToast('Profile deleted successfully', 'success');
+    showToast(t('admin.toastDeleted'), 'success');
   };
 
   const closeForm = () => {
@@ -163,14 +165,14 @@ export const Admin = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage matrimonial profiles</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t('admin.title')}</h1>
+            <p className="text-muted-foreground">{t('admin.subtitle')}</p>
           </div>
-          
+
           {!showForm && (
             <Button onClick={() => setShowForm(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Profile
+              {t('admin.addProfile')}
             </Button>
           )}
         </div>
@@ -181,7 +183,7 @@ export const Admin = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>
-                  {editingProfile ? 'Edit Profile' : 'Add New Profile'}
+                  {editingProfile ? t('admin.editProfile') : t('admin.addNewProfile')}
                 </CardTitle>
                 <Button variant="ghost" size="sm" onClick={closeForm}>
                   <X className="w-4 h-4" />
@@ -192,7 +194,7 @@ export const Admin = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name *</Label>
+                    <Label htmlFor="firstName">{t('admin.firstName')} *</Label>
                     <Input
                       id="firstName"
                       name="firstName"
@@ -202,7 +204,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="middleName">Middle Name</Label>
+                    <Label htmlFor="middleName">{t('admin.middleName')}</Label>
                     <Input
                       id="middleName"
                       name="middleName"
@@ -211,7 +213,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Label htmlFor="lastName">{t('admin.lastName')} *</Label>
                     <Input
                       id="lastName"
                       name="lastName"
@@ -224,7 +226,7 @@ export const Admin = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">{t('admin.email')} *</Label>
                     <Input
                       id="email"
                       name="email"
@@ -235,7 +237,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone *</Label>
+                    <Label htmlFor="phone">{t('admin.phone')} *</Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -248,7 +250,7 @@ export const Admin = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="dob">Date of Birth *</Label>
+                    <Label htmlFor="dob">{t('admin.dob')} *</Label>
                     <Input
                       id="dob"
                       name="dob"
@@ -259,7 +261,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="gender">Gender *</Label>
+                    <Label htmlFor="gender">{t('admin.gender')} *</Label>
                     <select
                       id="gender"
                       name="gender"
@@ -268,16 +270,16 @@ export const Admin = () => {
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       required
                     >
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
+                      <option value="male">{t('common.male')}</option>
+                      <option value="female">{t('common.female')}</option>
+                      <option value="other">{t('common.other')}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
+                    <Label htmlFor="city">{t('admin.city')} *</Label>
                     <Input
                       id="city"
                       name="city"
@@ -287,7 +289,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="state">State *</Label>
+                    <Label htmlFor="state">{t('admin.state')} *</Label>
                     <Input
                       id="state"
                       name="state"
@@ -297,7 +299,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pincode">Pincode *</Label>
+                    <Label htmlFor="pincode">{t('admin.pincode')} *</Label>
                     <Input
                       id="pincode"
                       name="pincode"
@@ -310,7 +312,7 @@ export const Admin = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="caste">Caste *</Label>
+                    <Label htmlFor="caste">{t('admin.caste')} *</Label>
                     <Input
                       id="caste"
                       name="caste"
@@ -320,7 +322,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="subCaste">Sub-caste</Label>
+                    <Label htmlFor="subCaste">{t('admin.subCaste')}</Label>
                     <Input
                       id="subCaste"
                       name="subCaste"
@@ -332,7 +334,7 @@ export const Admin = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="education">Education *</Label>
+                    <Label htmlFor="education">{t('admin.education')} *</Label>
                     <Input
                       id="education"
                       name="education"
@@ -342,7 +344,7 @@ export const Admin = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="occupation">Occupation *</Label>
+                    <Label htmlFor="occupation">{t('admin.occupation')} *</Label>
                     <Input
                       id="occupation"
                       name="occupation"
@@ -354,7 +356,7 @@ export const Admin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
+                  <Label htmlFor="bio">{t('admin.bio')}</Label>
                   <Textarea
                     id="bio"
                     name="bio"
@@ -366,10 +368,10 @@ export const Admin = () => {
 
                 <div className="flex gap-4">
                   <Button type="submit">
-                    {editingProfile ? 'Update Profile' : 'Add Profile'}
+                    {editingProfile ? t('admin.update') : t('admin.add')}
                   </Button>
                   <Button type="button" variant="outline" onClick={closeForm}>
-                    Cancel
+                    {t('admin.cancel')}
                   </Button>
                 </div>
               </form>
@@ -380,24 +382,24 @@ export const Admin = () => {
         {/* Profiles List */}
         <Card>
           <CardHeader>
-            <CardTitle>All Profiles ({profiles.length})</CardTitle>
+            <CardTitle>{t('admin.allProfiles', { count: profiles.length })}</CardTitle>
           </CardHeader>
           <CardContent>
             {profiles.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                No profiles yet. Add your first profile above.
+                {t('admin.empty')}
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left py-3 px-2">Name</th>
-                      <th className="text-left py-3 px-2">Age</th>
-                      <th className="text-left py-3 px-2">City</th>
-                      <th className="text-left py-3 px-2">Education</th>
-                      <th className="text-left py-3 px-2">Occupation</th>
-                      <th className="text-right py-3 px-2">Actions</th>
+                      <th className="text-left py-3 px-2">{t('admin.thName')}</th>
+                      <th className="text-left py-3 px-2">{t('admin.thAge')}</th>
+                      <th className="text-left py-3 px-2">{t('admin.thCity')}</th>
+                      <th className="text-left py-3 px-2">{t('admin.thEducation')}</th>
+                      <th className="text-left py-3 px-2">{t('admin.thOccupation')}</th>
+                      <th className="text-right py-3 px-2">{t('admin.thActions')}</th>
                     </tr>
                   </thead>
                   <tbody>
