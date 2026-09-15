@@ -1,0 +1,24 @@
+﻿# KadamVivah - Uploads Security Configuration
+# Prevent script and executable execution in uploads directory
+
+<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|php8|phps|pl|py|cgi|asp|aspx|sh|bash|exe|bat|cmd|dll)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Only allow safe image formats to be served
+<FilesMatch "(?i)\.(jpe?g|png|webp|gif)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+Options -Indexes -ExecCGI
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>

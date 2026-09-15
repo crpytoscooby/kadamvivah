@@ -10,10 +10,10 @@ import { Mail, Lock, AlertCircle, Loader } from 'lucide-react';
  * Redirects to password change if mustChangePassword is true.
  */
 
-export default function Login() {
+export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, logout, login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -33,6 +33,10 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isAuthenticated()) {
+      setError('You are already logged in. Please log out first to switch accounts.');
+      return;
+    }
     setError('');
     setLoading(true);
 
@@ -70,6 +74,35 @@ export default function Login() {
     }
   };
 
+  if (!authLoading && isAuthenticated()) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Already Signed In</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            You are currently signed in as <strong className="text-gray-900">{user?.email}</strong> ({user?.firstName || user?.first_name} {user?.lastName || user?.last_name}).
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => navigate('/my-profile')}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200"
+            >
+              Go to My Profile
+            </button>
+            <button
+              onClick={async () => {
+                await logout();
+              }}
+              className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition duration-200"
+            >
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
@@ -81,7 +114,7 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-white rounded-lg shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Member Login</h2>
 
           {/* Error Message */}
           {error && (
@@ -106,7 +139,7 @@ export default function Login() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="your@email.com"
+                  placeholder="e.g. rahul@example.com"
                   disabled={loading}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
                   required
@@ -144,27 +177,30 @@ export default function Login() {
               {loading ? (
                 <>
                   <Loader className="w-5 h-5 animate-spin" />
-                  Logging in...
+                  Signing In...
                 </>
               ) : (
-                'Login'
+                'Sign In'
               )}
             </button>
           </form>
 
-          {/* Info Message */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-700 text-sm">
-              <strong>Demo Account:</strong> Contact your administrator to get login credentials.
-            </p>
+          {/* Register Prompt */}
+          <div className="mt-6 text-center text-sm text-gray-600">
+            Don't have an account?{' '}
+            <a href="/register" className="font-semibold text-amber-700 hover:text-amber-800 underline">
+              Create a free profile
+            </a>
           </div>
         </div>
 
         {/* Footer */}
         <p className="text-center text-gray-600 text-sm mt-6">
-          100% Free Service • No Hidden Charges
+          100% Free Service • Zero Hidden Charges
         </p>
       </div>
     </div>
   );
 }
+
+export default Login;

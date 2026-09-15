@@ -2,12 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../lib/api';
 
 /**
- * AuthContext - Manages authentication state across the application
- * 
- * Stores:
- * - token: JWT token from login (stored in localStorage)
- * - user: User object with { id, email, firstName, lastName, role, mustChangePassword }
- * - mustChangePassword: Flag to force password change on first login
+ * AuthContext - Manages authenticated user session across the application.
+ * Uses secure HttpOnly cookie session via backend API.
  */
 
 const AuthContext = createContext(null);
@@ -22,82 +18,167 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [mustChangePassword, setMustChangePassword] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load token and user from localStorage on mount
-  useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    const storedUser = localStorage.getItem('authUser');
-    const storedMustChangePassword = localStorage.getItem('mustChangePassword') === 'true';
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      setMustChangePassword(storedMustChangePassword);
+  // Verify authenticated session with backend
+  const verifySession = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      const freshUser = response.data?.data?.user;
+      if (freshUser) {
+        setUser(freshUser);
+        localStorage.setItem('authUser', JSON.stringify(freshUser));
+        return freshUser;
+      } else {
+        setUser(null);
+        localStorage.removeItem('authUser');
+        return null;
+      }
+    } catch (error) {
+      setUser(null);
+      localStorage.removeItem('authUser');
+      return null;
     }
-    setLoading(false);
+  };
+
+  // Check authenticated session on mount from /api/auth/me
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkAuth = async () => {
+      // Optimistically restore cached user object for instant UI render
+      const cachedUser = localStorage.getItem('authUser');
+      if (cachedUser) {
+        try {
+          setUser(JSON.parse(cachedUser));
+        } catch (e) {
+          localStorage.removeItem('authUser');
+        }
+      }
+
+      try {
+        const response = await api.get('/auth/me');
+        if (isMounted) {
+          const freshUser = response.data?.data?.user;
+          if (freshUser) {
+            setUser(freshUser);
+            localStorage.setItem('authUser', JSON.stringify(freshUser));
+          } else {
+            setUser(null);
+            localStorage.removeItem('authUser');
+          }
+        }
+      } catch (error) {
+        if (isMounted) {
+          setUser(null);
+          localStorage.removeItem('authUser');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    checkAuth();
+
+    // Cross-tab synchronization via storage events
+    const handleStorageChange = (e) => {
+      if (e.key === 'authUser') {
+        if (e.newValue) {
+          try {
+            const parsed = JSON.parse(e.newValue);
+            setUser(parsed);
+          } catch (err) {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    };
+
+    // Re-verify session on window focus / tab visibility change (throttled)
+    let lastFocusCheck = 0;
+    const handleFocusOrVisibility = () => {
+      const now = Date.now();
+      if (now - lastFocusCheck > 3000) {
+        lastFocusCheck = now;
+        verifySession();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocusOrVisibility);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleFocusOrVisibility();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocusOrVisibility);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Login with email and password
   const login = async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token, user } = response.data;
+      const authenticatedUser = response.data?.data?.user;
 
-      setToken(token);
-      setUser(user);
-      setMustChangePassword(user.mustChangePassword || false);
+      if (!authenticatedUser) {
+        throw new Error('Failed to retrieve user information.');
+      }
 
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('authUser', JSON.stringify(user));
-      localStorage.setItem('mustChangePassword', user.mustChangePassword ? 'true' : 'false');
+      setUser(authenticatedUser);
+      localStorage.setItem('authUser', JSON.stringify(authenticatedUser));
 
-      return { success: true, user };
+      return { success: true, user: authenticatedUser };
     } catch (error) {
       console.error('Login error:', error);
       throw error;
     }
   };
 
-  // Change password
-  const changePassword = async (oldPassword, newPassword, confirmPassword) => {
+  // Register new user and profile
+  const register = async (userData) => {
     try {
-      const response = await api.post('/auth/change-password', {
-        oldPassword,
-        newPassword,
-        confirmPassword
-      });
+      const response = await api.post('/auth/register', userData);
+      const registeredUser = response.data?.data?.user;
 
-      const { token, user } = response.data;
+      if (!registeredUser) {
+        throw new Error('Registration succeeded but user data was missing.');
+      }
 
-      setToken(token);
-      setUser(user);
-      setMustChangePassword(false);
+      setUser(registeredUser);
+      localStorage.setItem('authUser', JSON.stringify(registeredUser));
 
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('authUser', JSON.stringify(user));
-      localStorage.setItem('mustChangePassword', 'false');
-
-      return { success: true, user };
+      return { success: true, user: registeredUser };
     } catch (error) {
-      console.error('Change password error:', error);
+      console.error('Registration error:', error);
       throw error;
     }
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    setMustChangePassword(false);
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
-    localStorage.removeItem('mustChangePassword');
+  // Logout
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('authUser');
+    }
   };
 
   const isAuthenticated = () => {
-    return !!token && !!user;
+    return !!user && user.account_status !== 'suspended';
   };
 
   const isAdmin = () => {
@@ -106,12 +187,11 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    token,
-    mustChangePassword,
     loading,
     login,
-    changePassword,
+    register,
     logout,
+    verifySession,
     isAuthenticated,
     isAdmin
   };

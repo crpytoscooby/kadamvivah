@@ -25,14 +25,14 @@ export const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 text-balance">
-              Find Your Perfect Match
+              Find Your Ideal Life Partner
             </h1>
             <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6 font-devanagari">
               योग्य जोडीदार शोधा
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 text-balance">
-              KadamVivah is a <span className="font-semibold text-foreground">free</span> matrimony service for the Marathi community. 
-              Create an account to view profiles and connect with families.
+              KadamVivah is a <span className="font-semibold text-foreground">100% free</span> matrimony platform dedicated to the Marathi community. 
+              Create your account to view verified profiles and connect directly with families.
             </p>
             <p className="text-base md:text-lg text-muted-foreground mb-8 font-devanagari">
               प्रोफाइल पाहण्यासाठी विनामूल्य खाते तयार करा
@@ -42,7 +42,7 @@ export const Home = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/register">
                   <Button size="lg" className="w-full sm:w-auto text-lg px-8">
-                    Create Free Account
+                    Register Free
                   </Button>
                 </Link>
                 <Link to="/login">
@@ -68,10 +68,10 @@ export const Home = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
               <h3 className="text-2xl md:text-3xl font-bold mb-2">
-                Discover Profiles
+                Discover Suitable Matches
               </h3>
               <p className="text-muted-foreground">
-                Register for free to view detailed profiles
+                Register for free to view complete biodatas and photographs
               </p>
             </div>
 
@@ -95,13 +95,13 @@ export const Home = () => {
                 <Card className="max-w-md mx-4">
                   <CardContent className="p-8 text-center">
                     <Lock className="w-16 h-16 mx-auto mb-4 text-primary" />
-                    <h4 className="text-xl font-bold mb-2">Profiles are Private</h4>
+                    <h4 className="text-xl font-bold mb-2">Profiles & Contacts Protected</h4>
                     <p className="text-muted-foreground mb-6">
-                      Create a free account to view all profiles and connect with potential matches
+                      Create your free account to view detailed biodatas and connect with prospective matches
                     </p>
                     <Link to="/register">
                       <Button size="lg" className="w-full">
-                        Register Now - It's Free!
+                        Register Free Today
                       </Button>
                     </Link>
                   </CardContent>
@@ -130,9 +130,9 @@ export const Home = () => {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Heart className="w-6 h-6 text-primary" />
                 </div>
-                <h4 className="text-lg font-semibold mb-2">100% Free</h4>
+                <h4 className="text-lg font-semibold mb-2">100% Free Service</h4>
                 <p className="text-sm text-muted-foreground">
-                  No hidden charges. Completely free service for the Marathi community.
+                  Zero registration fees or hidden charges. Completely free matrimony service for our Marathi community.
                 </p>
               </CardContent>
             </Card>
@@ -142,9 +142,9 @@ export const Home = () => {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
-                <h4 className="text-lg font-semibold mb-2">Safe & Secure</h4>
+                <h4 className="text-lg font-semibold mb-2">Verified & Secure</h4>
                 <p className="text-sm text-muted-foreground">
-                  Your privacy and data security are our top priorities.
+                  Member privacy, verified biodatas, and family safety are our highest priorities.
                 </p>
               </CardContent>
             </Card>
@@ -156,7 +156,7 @@ export const Home = () => {
                 </div>
                 <h4 className="text-lg font-semibold mb-2">Community Focused</h4>
                 <p className="text-sm text-muted-foreground">
-                  Built specifically for Marathi-speaking families with cultural respect.
+                  Tailored specifically for Marathi-speaking families with cultural values and mutual respect.
                 </p>
               </CardContent>
             </Card>
@@ -172,11 +172,11 @@ export const Home = () => {
               <div className="flex items-start gap-4">
                 <CheckCircle className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div>
-                  <h4 className="text-lg font-semibold mb-2">Special Thanks</h4>
+                  <h4 className="text-lg font-semibold mb-2">Special Gratitude</h4>
                   <p className="text-muted-foreground mb-2">
-                    We extend our heartfelt gratitude to <span className="font-semibold text-foreground">Nitin Kadam</span>, 
-                    a dedicated social worker based in Pune, active in the Parvati area. His commitment to local civic 
-                    issues and community service has been an inspiration for this initiative.
+                    We express our sincere gratitude to <span className="font-semibold text-foreground">Nitin Kadam</span>, 
+                    dedicated social worker from Pune (Parvati constituency), whose commitment to community welfare 
+                    has been an inspiration for this matrimonial initiative.
                   </p>
                   <p className="text-muted-foreground font-devanagari">
                     नितीन कदम यांचे आभार - पुणे येथील समाजसेवक, परवती परिसरातील सामाजिक कार्यासाठी समर्पित.
@@ -199,11 +199,11 @@ export const Home = () => {
               आपल्या जीवनसाथीला शोधण्यासाठी तयार आहात?
             </p>
             <p className="text-lg mb-8 opacity-90">
-              Join KadamVivah today - it's completely free!
+              Join KadamVivah today — completely free of cost!
             </p>
             <Link to="/register">
               <Button size="lg" variant="secondary" className="text-lg px-8">
-                Get Started Now
+                Register Free Now
               </Button>
             </Link>
           </div>

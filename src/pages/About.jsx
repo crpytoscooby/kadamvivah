@@ -19,9 +19,9 @@ export const About = () => {
             <CardContent className="p-8">
               <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                KadamVivah is a <span className="font-semibold text-foreground">completely free</span> matrimonial 
-                service dedicated to the Marathi-speaking community. We believe that finding a life partner should 
-                be accessible to everyone, without financial barriers.
+                KadamVivah is a <span className="font-semibold text-foreground">100% free</span> matrimonial 
+                service dedicated to the Marathi-speaking community. We believe finding a suitable life partner should 
+                be transparent, respectful, and accessible to every family without any financial burden.
               </p>
               <p className="text-muted-foreground leading-relaxed font-devanagari">
                 कदमविवाह ही मराठी भाषिक समुदायासाठी पूर्णपणे विनामूल्य विवाह सेवा आहे. आम्ही मानतो की 
@@ -36,10 +36,9 @@ export const About = () => {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Heart className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Free Service</h3>
+                <h3 className="text-xl font-semibold mb-2">100% Free Platform</h3>
                 <p className="text-muted-foreground text-sm">
-                  No registration fees, no subscription charges. Our service is and will always remain free 
-                  for the community.
+                  Zero registration fees, no contact unlock charges, and no hidden subscriptions. Our platform is and will always remain completely free for the community.
                 </p>
               </CardContent>
             </Card>
@@ -51,7 +50,7 @@ export const About = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Community Focused</h3>
                 <p className="text-muted-foreground text-sm">
-                  Built specifically for Marathi families with deep respect for cultural values and traditions.
+                  Built specifically for Marathi families across Maharashtra and beyond, respecting cultural traditions, gotra, and family values.
                 </p>
               </CardContent>
             </Card>
@@ -61,10 +60,9 @@ export const About = () => {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Safe & Secure</h3>
+                <h3 className="text-xl font-semibold mb-2">Safe & Privacy-First</h3>
                 <p className="text-muted-foreground text-sm">
-                  Your privacy and data security are our highest priorities. We protect your information 
-                  with industry-standard security measures.
+                  Member privacy and profile authenticity are our highest priorities. Direct contact details are shared only upon mutual consent.
                 </p>
               </CardContent>
             </Card>
@@ -74,10 +72,9 @@ export const About = () => {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Target className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Simple & Easy</h3>
+                <h3 className="text-xl font-semibold mb-2">Simple & Accessible</h3>
                 <p className="text-muted-foreground text-sm">
-                  User-friendly interface designed for all age groups. No complicated processes, just 
-                  straightforward matchmaking.
+                  Clean, user-friendly interface designed for candidates and parents of all age groups to browse biodatas with ease.
                 </p>
               </CardContent>
             </Card>
@@ -92,8 +89,8 @@ export const About = () => {
                     1
                   </span>
                   <div>
-                    <span className="font-semibold text-foreground">Create Your Profile:</span> Register for 
-                    free and fill in your details to create a comprehensive matrimonial profile.
+                    <span className="font-semibold text-foreground">Create Matrimonial Profile:</span> Register for 
+                    free and fill in educational, professional, family, and personal biodata details.
                   </div>
                 </li>
                 <li className="flex gap-3">
@@ -101,8 +98,8 @@ export const About = () => {
                     2
                   </span>
                   <div>
-                    <span className="font-semibold text-foreground">Browse Profiles:</span> Once registered, 
-                    you can view all profiles and use filters to find matches that meet your preferences.
+                    <span className="font-semibold text-foreground">Browse Suitable Matches:</span> Search 
+                    verified profiles and use filters (city, education, caste, age) to find matching candidates.
                   </div>
                 </li>
                 <li className="flex gap-3">
@@ -110,8 +107,8 @@ export const About = () => {
                     3
                   </span>
                   <div>
-                    <span className="font-semibold text-foreground">Connect Directly:</span> Contact details 
-                    are visible to all registered users, allowing families to connect directly.
+                    <span className="font-semibold text-foreground">Connect with Families:</span> Express interest 
+                    and unlock verified direct contact details once mutual interest is accepted.
                   </div>
                 </li>
               </ol>
@@ -122,9 +119,9 @@ export const About = () => {
             <CardContent className="p-8">
               <h2 className="text-2xl font-bold mb-4">Our Commitment</h2>
               <p className="text-muted-foreground leading-relaxed">
-                We are committed to maintaining this platform as a free service for the Marathi community. 
-                This initiative is driven by the desire to serve and support families in their search for 
-                suitable life partners, without commercial interests.
+                We are wholeheartedly committed to maintaining KadamVivah as a free community service for Marathi families. 
+                This initiative is driven purely by the desire to support families in finding suitable life partners, 
+                without commercial interests.
               </p>
             </CardContent>
           </Card>

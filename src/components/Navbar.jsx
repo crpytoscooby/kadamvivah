@@ -1,10 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
-import { Menu, X, User, LogOut, UserCog } from 'lucide-react';
-import { useState } from 'react';
+import { Menu, X, User, LogOut, HeartHandshake } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageToggle } from './LanguageToggle';
+import api from '../lib/api';
 
 /**
  * Navbar - Main navigation component
@@ -13,15 +14,36 @@ import { LanguageToggle } from './LanguageToggle';
  * - Logo with Marathi badge 'कद'
  * - Responsive mobile menu
  * - Shows Login/Register when logged out
- * - Shows user menu with profile and logout when logged in
- * - Shows admin link for admin users
+ * - Shows user menu with profile, interests, and logout when logged in
+ * - Shows pending interests badge for quick notifications
  */
 
 export const Navbar = () => {
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const { t } = useTranslation('common');
+
+  // Fetch pending received count for notification badge
+  useEffect(() => {
+    let isMounted = true;
+    if (isAuthenticated()) {
+      api.get('/interests/counts')
+        .then((res) => {
+          if (isMounted) {
+            setPendingCount(res.data?.data?.pending_received || 0);
+          }
+        })
+        .catch(() => {
+          // Ignore count error silently
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated(), location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -62,25 +84,27 @@ export const Navbar = () => {
                 <Link to="/profiles">
                   <Button variant="ghost">Profiles</Button>
                 </Link>
-                {isAdmin() && (
-                  <>
-                    <Link to="/admin">
-                      <Button variant="ghost" size="sm">
-                        <UserCog className="w-4 h-4 mr-2" />
-                        {t('admin')}
-                      </Button>
-                    </Link>
-                    <Link to="/admin/import">
-                      <Button variant="ghost" size="sm">
-                        Import
-                      </Button>
-                    </Link>
-                  </>
-                )}
+                <Link to="/interests">
+                  <Button variant="ghost" className="relative flex items-center">
+                    <HeartHandshake className="w-4 h-4 mr-1.5 text-primary" />
+                    Interests
+                    {pendingCount > 0 && (
+                      <span className="ml-1.5 px-1.5 py-0.5 text-xs font-bold bg-primary text-primary-foreground rounded-full animate-pulse">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+                <Link to="/my-profile">
+                  <Button variant="ghost">
+                    <User className="w-4 h-4 mr-2" />
+                    My Profile
+                  </Button>
+                </Link>
                 <div className="flex items-center space-x-2 border-l border-border pl-4 ml-2">
-                  <span className="text-sm text-muted-foreground">
-                    {user?.firstName} {user?.lastName}
-                  </span>
+                  <Link to="/my-profile" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+                    {user?.firstName || user?.first_name} {user?.lastName || user?.last_name}
+                  </Link>
                   <Button variant="outline" size="sm" onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
@@ -144,18 +168,31 @@ export const Navbar = () => {
                   >
                     Profiles
                   </Link>
-                  {isAdmin() && (
-                    <Link
-                      to="/admin"
-                      className="px-3 py-2 rounded-md hover:bg-accent transition-colors flex items-center"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <UserCog className="w-4 h-4 mr-2" />
-                      Admin
-                    </Link>
-                  )}
+                  <Link
+                    to="/interests"
+                    className="px-3 py-2 rounded-md hover:bg-accent transition-colors flex items-center justify-between"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="flex items-center">
+                      <HeartHandshake className="w-4 h-4 mr-2 text-primary" />
+                      Interests & Matches
+                    </span>
+                    {pendingCount > 0 && (
+                      <span className="px-2 py-0.5 text-xs font-bold bg-primary text-primary-foreground rounded-full">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </Link>
+                  <Link
+                    to="/my-profile"
+                    className="px-3 py-2 rounded-md hover:bg-accent transition-colors flex items-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    My Profile
+                  </Link>
                   <div className="px-3 py-2 text-sm text-muted-foreground border-t border-border mt-2 pt-3">
-                    Logged in as: {user?.firstName} {user?.lastName}
+                    Logged in as: {user?.firstName || user?.first_name} {user?.lastName || user?.last_name}
                   </div>
                   <Button variant="outline" onClick={handleLogout} className="mx-3">
                     <LogOut className="w-4 h-4 mr-2" />
@@ -181,3 +218,5 @@ export const Navbar = () => {
     </nav>
   );
 };
+
+export default Navbar;

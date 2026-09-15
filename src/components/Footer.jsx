@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Footer - Site footer with links and copyright
  */
 
 export const Footer = () => {
+  const { isAdmin } = useAuth();
+
   return (
     <footer className="bg-muted border-t border-border mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -19,7 +22,7 @@ export const Footer = () => {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Free Marathi matrimony service connecting families with trust and respect.
+              Free Marathi matrimony platform connecting families with trust, tradition, and respect.
             </p>
             <p className="text-sm text-muted-foreground mt-2 font-devanagari">
               विनामूल्य मराठी विवाह सेवा
@@ -37,7 +40,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-                  Contact
+                  Contact Us
                 </Link>
               </li>
               <li>
@@ -50,6 +53,13 @@ export const Footer = () => {
                   Terms of Service
                 </Link>
               </li>
+              {isAdmin && isAdmin() && (
+                <li>
+                  <Link to="/admin" className="text-muted-foreground hover:text-primary transition-colors font-medium">
+                    Admin Panel
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -57,7 +67,7 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-3">Get in Touch</h3>
             <p className="text-sm text-muted-foreground mb-2">
-              Have questions? We're here to help.
+              Have questions or need assistance? We are here to help.
             </p>
             <Link to="/contact" className="text-sm text-primary hover:underline">
               Contact Us →
@@ -67,7 +77,7 @@ export const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
           <p className="flex items-center">
-            Made with <Heart className="w-4 h-4 mx-1 text-primary fill-current" /> for the Marathi community
+            Dedicated with <Heart className="w-4 h-4 mx-1 text-primary fill-current" /> to the Marathi community across Maharashtra & beyond
           </p>
           <p className="mt-2 md:mt-0">
             © {new Date().getFullYear()} KadamVivah. All rights reserved.

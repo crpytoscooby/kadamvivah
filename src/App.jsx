@@ -10,6 +10,8 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Profiles } from './pages/Profiles';
 import { ProfileDetail } from './pages/ProfileDetail';
+import { MyProfile } from './pages/MyProfile';
+import { Interests } from './pages/Interests';
 import { Admin } from './pages/Admin';
 import { AdminImport } from './pages/AdminImport';
 import { About } from './pages/About';
@@ -61,6 +63,38 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfileDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/interests"
+                element={
+                  <ProtectedRoute>
+                    <Interests />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/matches"
+                element={
+                  <ProtectedRoute>
+                    <Interests />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-profile"
+                element={
+                  <ProtectedRoute>
+                    <MyProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <MyProfile />
                   </ProtectedRoute>
                 }
               />

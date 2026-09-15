@@ -30,6 +30,7 @@ export const Profiles = () => {
     dobFrom: '',
     dobTo: '',
     city: '',
+    caste: '',
     education: ''
   });
 
@@ -47,49 +48,33 @@ export const Profiles = () => {
   const fetchProfiles = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await api.get('/profiles', {
-      //   params: {
-      //     ...filters,
-      //     page: pagination.page,
-      //     limit: pagination.limit
-      //   }
-      // });
-      
-      // Mock implementation
-      const mockProfiles = JSON.parse(localStorage.getItem('mockProfiles') || '[]');
-      
-      // Apply filters
-      let filtered = mockProfiles;
-      
-      if (filters.gender) {
-        filtered = filtered.filter(p => p.gender === filters.gender);
-      }
-      
-      if (filters.city) {
-        filtered = filtered.filter(p => 
-          p.city.toLowerCase().includes(filters.city.toLowerCase())
-        );
-      }
-      
-      if (filters.education) {
-        filtered = filtered.filter(p => 
-          p.education.toLowerCase().includes(filters.education.toLowerCase())
-        );
-      }
+      const cleanParams = {
+        page: pagination.page,
+        limit: pagination.limit
+      };
 
-      // Pagination
-      const total = filtered.length;
-      const totalPages = Math.ceil(total / pagination.limit);
-      const start = (pagination.page - 1) * pagination.limit;
-      const end = start + pagination.limit;
-      const paginatedProfiles = filtered.slice(start, end);
+      if (filters.gender) cleanParams.gender = filters.gender;
+      if (filters.city) cleanParams.city = filters.city;
+      if (filters.caste) cleanParams.caste = filters.caste;
+      if (filters.education) cleanParams.education = filters.education;
+      if (filters.dobFrom) cleanParams.dobFrom = filters.dobFrom;
+      if (filters.dobTo) cleanParams.dobTo = filters.dobTo;
 
-      setProfiles(paginatedProfiles);
-      setPagination(prev => ({ ...prev, total, totalPages }));
+      const response = await api.get('/profiles', { params: cleanParams });
+      const data = response.data?.data || {};
+
+      setProfiles(data.profiles || []);
+      if (data.pagination) {
+        setPagination(prev => ({
+          ...prev,
+          total: data.pagination.total || 0,
+          totalPages: data.pagination.totalPages || 0
+        }));
+      }
     } catch (error) {
       console.error('Error fetching profiles:', error);
-      showToast('Failed to load profiles', 'error');
+      showToast(error.response?.data?.message || 'Failed to load profiles', 'error');
+      setProfiles([]);
     } finally {
       setLoading(false);
     }
@@ -107,6 +92,7 @@ export const Profiles = () => {
       dobFrom: '',
       dobTo: '',
       city: '',
+      caste: '',
       education: ''
     });
     setPagination(prev => ({ ...prev, page: 1 }));
@@ -128,7 +114,7 @@ export const Profiles = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Browse Profiles</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Browse Matrimonial Profiles</h1>
           <p className="text-muted-foreground font-devanagari">प्रोफाइल पहा</p>
         </div>
 
@@ -141,7 +127,7 @@ export const Profiles = () => {
                 className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
               >
                 <Filter className="w-5 h-5" />
-                <span className="font-semibold">Filters</span>
+                <span className="font-semibold">Filter Profiles</span>
                 {hasActiveFilters && (
                   <span className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full">
                     Active
@@ -152,7 +138,7 @@ export const Profiles = () => {
               {hasActiveFilters && (
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                   <X className="w-4 h-4 mr-2" />
-                  Clear All
+                  Clear All Filters
                 </Button>
               )}
             </div>
@@ -160,7 +146,7 @@ export const Profiles = () => {
             {filtersOpen && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-border animate-in slide-in-from-top">
                 <div className="space-y-2">
-                  <Label htmlFor="gender">Gender</Label>
+                  <Label htmlFor="gender">Looking For (लिंग)</Label>
                   <select
                     id="gender"
                     name="gender"
@@ -168,37 +154,48 @@ export const Profiles = () => {
                     onChange={handleFilterChange}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >
-                    <option value="">All</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+                    <option value="">All Profiles</option>
+                    <option value="male">Groom (पुरुष)</option>
+                    <option value="female">Bride (स्त्री)</option>
                     <option value="other">Other</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">City / Location (शहर)</Label>
                   <Input
                     id="city"
                     name="city"
-                    placeholder="Search by city"
+                    placeholder="e.g. Pune, Mumbai"
                     value={filters.city}
                     onChange={handleFilterChange}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="education">Education</Label>
+                  <Label htmlFor="education">Education (शिक्षण)</Label>
                   <Input
                     id="education"
                     name="education"
-                    placeholder="Search by education"
+                    placeholder="e.g. B.E., MBA, MBBS"
                     value={filters.education}
                     onChange={handleFilterChange}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dobFrom">Age Range</Label>
+                  <Label htmlFor="caste">Caste (जात)</Label>
+                  <Input
+                    id="caste"
+                    name="caste"
+                    placeholder="e.g. Maratha, 96 Kuli"
+                    value={filters.caste}
+                    onChange={handleFilterChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="dobFrom">Date of Birth (From - To)</Label>
                   <div className="flex gap-2">
                     <Input
                       id="dobFrom"
@@ -206,7 +203,15 @@ export const Profiles = () => {
                       type="date"
                       value={filters.dobFrom}
                       onChange={handleFilterChange}
-                      placeholder="From"
+                      title="Born on or after"
+                    />
+                    <Input
+                      id="dobTo"
+                      name="dobTo"
+                      type="date"
+                      value={filters.dobTo}
+                      onChange={handleFilterChange}
+                      title="Born on or before"
                     />
                   </div>
                 </div>
@@ -221,7 +226,7 @@ export const Profiles = () => {
             'Loading profiles...'
           ) : (
             <>
-              Showing {profiles.length} of {pagination.total} profiles
+              Showing {profiles.length} of {pagination.total} candidate profiles
               {hasActiveFilters && ' (filtered)'}
             </>
           )}
@@ -235,7 +240,7 @@ export const Profiles = () => {
         ) : profiles.length === 0 ? (
           <Card className="py-20">
             <CardContent className="text-center">
-              <p className="text-lg text-muted-foreground mb-2">No profiles found</p>
+              <p className="text-lg text-muted-foreground mb-2">No matching profiles found</p>
               <p className="text-sm text-muted-foreground mb-4 font-devanagari">
                 कोणतेही प्रोफाइल आढळले नाहीत
               </p>

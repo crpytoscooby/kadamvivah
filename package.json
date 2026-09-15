@@ -4,12 +4,16 @@
   "description": "A free, modern matrimonial platform for the Marathi-speaking community. This project includes both a React frontend and a Node.js/Express backend, designed for production readiness.",
   "main": "importController.js",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.22",
     "axios": "^1.13.2",
