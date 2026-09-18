@@ -235,7 +235,7 @@ export const MyProfile = () => {
       await api.put('/profile/me', { ...formData, familyDetails });
 
       // Submit for review
-      const response = await api.post('/profile/submit-review');
+      const response = await api.post('/profile/submit');
       const updatedData = response.data?.data;
       if (updatedData) {
         setProfileData(updatedData);
