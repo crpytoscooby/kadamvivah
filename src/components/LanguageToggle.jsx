@@ -4,22 +4,26 @@ import { Button } from './ui/button';
 
 export const LanguageToggle = () => {
   const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'en';
+  const isMarathi = currentLang.startsWith('mr');
 
   const toggleLanguage = () => {
-    const nextLang = i18n.language === 'mr' ? 'en' : 'mr';
+    const nextLang = isMarathi ? 'en' : 'mr';
     i18n.changeLanguage(nextLang);
   };
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 text-gray-700 hover:bg-gray-100"
-      title="Switch Language / भाषा बदला"
+      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border-[#D9C39E] text-[#7A1526] hover:bg-[#F8F3EA] transition-all shadow-2xs"
+      title={isMarathi ? 'Switch to English' : 'मराठी मध्ये पहा'}
     >
-      <Languages className="w-4 h-4 text-primary" />
-      <span>{i18n.language === 'mr' ? 'मराठी' : 'English'}</span>
+      <Languages className="w-3.5 h-3.5 text-[#B88E4B]" />
+      <span className={isMarathi ? 'font-sans' : 'font-devanagari'}>
+        {isMarathi ? 'English' : 'मराठी'}
+      </span>
     </Button>
   );
 };

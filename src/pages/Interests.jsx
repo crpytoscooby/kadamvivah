@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
+import { useTranslation } from 'react-i18next';
 import { 
   Heart, 
   HeartHandshake, 
@@ -33,16 +32,21 @@ import dayjs from 'dayjs';
 /**
  * Interests Page - Complete Matrimonial Match & Interest Hub
  * 
- * Features:
- * - Tab 1: Received Interests (Accept / Decline with custom confirmation modals)
- * - Tab 2: Sent Interests (Live status tracking)
- * - Tab 3: Matches / Accepted (Unlocked direct contact cards)
- * - Connected strictly to real PHP REST API and MariaDB backend.
+ * Styled with KadamVivah premium design system:
+ * - Warm Ivory (#FAF7F2) background
+ * - Deep Maroon (#7A1526) primary tabs, badges & buttons
+ * - Antique Gold (#B88E4B) accents & highlight counts
+ * - Warm borders (#EAE0D2) & structured matrimonial cards
+ * - Strict Marathi & English single-language support
+ * - Preserved real PHP REST API and MariaDB matching logic
  */
+
 export const Interests = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast, ToastContainer } = useToast();
+  const { i18n } = useTranslation();
+  const isMarathi = (i18n.language || 'en').startsWith('mr');
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Active tab state: 'received' | 'sent' | 'matches'
@@ -105,7 +109,7 @@ export const Interests = () => {
       setCounts(countsRes.data?.data || { pending_received: 0, matches: 0, sent_pending: 0 });
     } catch (error) {
       console.error('Failed to load interests:', error);
-      showToast(error.response?.data?.message || 'Failed to load interest requests', 'error');
+      showToast(error.response?.data?.message || (isMarathi ? 'माहिती लोड करण्यात त्रुटी आली' : 'Failed to load interest requests'), 'error');
     } finally {
       setLoading(false);
     }
@@ -115,14 +119,19 @@ export const Interests = () => {
     if (!acceptingInterest || acceptLoading) return;
 
     const interestId = acceptingInterest.id;
-    const candidateName = `${acceptingInterest.candidate?.firstName || acceptingInterest.candidate?.first_name || 'Candidate'}`;
+    const candidateName = `${acceptingInterest.candidate?.firstName || acceptingInterest.candidate?.first_name || (isMarathi ? 'उमेदवार' : 'Candidate')}`;
 
     setAcceptLoading(true);
     try {
       const response = await api.post(`/interests/${interestId}/accept`);
       const unlockedData = response.data?.data;
 
-      showToast(`Interest from ${candidateName} accepted! Contact details unlocked.`, 'success');
+      showToast(
+        isMarathi 
+          ? `${candidateName} यांची पसंती विनंती स्वीकारली! संपर्क अनलॉक झाला.` 
+          : `Interest from ${candidateName} accepted! Contact details unlocked.`, 
+        'success'
+      );
 
       // Update received interest list locally
       setReceivedInterests(prev => prev.map(item => {
@@ -144,12 +153,11 @@ export const Interests = () => {
         matches: prev.matches + 1
       }));
 
-      // Close modal and refresh all data in background
       setAcceptingInterest(null);
       fetchAllData();
     } catch (error) {
       console.error('Failed to accept interest:', error);
-      showToast(error.response?.data?.message || 'Failed to accept interest request', 'error');
+      showToast(error.response?.data?.message || (isMarathi ? 'विनंती स्वीकारण्यात त्रुटी आली' : 'Failed to accept interest request'), 'error');
     } finally {
       setAcceptLoading(false);
     }
@@ -159,12 +167,17 @@ export const Interests = () => {
     if (!decliningInterest || declineLoading) return;
 
     const interestId = decliningInterest.id;
-    const candidateName = `${decliningInterest.candidate?.firstName || decliningInterest.candidate?.first_name || 'Candidate'}`;
+    const candidateName = `${decliningInterest.candidate?.firstName || decliningInterest.candidate?.first_name || (isMarathi ? 'उमेदवार' : 'Candidate')}`;
 
     setDeclineLoading(true);
     try {
       await api.post(`/interests/${interestId}/reject`);
-      showToast(`Interest request from ${candidateName} declined.`, 'success');
+      showToast(
+        isMarathi 
+          ? `${candidateName} यांची पसंती विनंती नाकारली.` 
+          : `Interest request from ${candidateName} declined.`, 
+        'success'
+      );
 
       // Update received list locally
       setReceivedInterests(prev => prev.map(item => {
@@ -183,7 +196,7 @@ export const Interests = () => {
       setDecliningInterest(null);
     } catch (error) {
       console.error('Failed to decline interest:', error);
-      showToast(error.response?.data?.message || 'Failed to decline interest request', 'error');
+      showToast(error.response?.data?.message || (isMarathi ? 'विनंती नाकारण्यात त्रुटी आली' : 'Failed to decline interest request'), 'error');
     } finally {
       setDeclineLoading(false);
     }
@@ -196,709 +209,614 @@ export const Interests = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-8">
+    <div className="min-h-screen bg-[#FAF7F2] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <ToastContainer />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Subtle background ambient pattern */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: 'radial-gradient(#7A1526 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-5 border-b border-[#EAE0D2]">
           <div>
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
-                <HeartHandshake className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Matches & Interest Requests</h1>
-                <p className="text-sm text-gray-500">Manage incoming connection requests, outbound interests, and mutual matches</p>
-              </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#F8F3EA] border border-[#D9C39E] rounded-full text-xs font-semibold text-[#7A1526] shadow-2xs mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-[#B88E4B] shrink-0" />
+              <span className={isMarathi ? 'font-devanagari font-bold' : 'font-sans font-semibold'}>
+                {isMarathi ? 'पसंती व जुळणी केंद्र' : 'Matches & Connections'}
+              </span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2B1B17]">
+              {isMarathi ? 'पसंती विनंत्या आणि जुळलेली स्थळे' : 'Matches & Interest Requests'}
+            </h1>
+            <p className="text-xs sm:text-sm text-[#6B5E55] mt-0.5">
+              {isMarathi 
+                ? 'आलेल्या विनंत्या, पाठवलेली पसंती आणि परस्पर जुळलेल्या स्थळांचे व्यवस्थापन करा.'
+                : 'Manage incoming connection requests, outbound interests, and mutual matches.'}
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            <button
+              type="button"
               onClick={fetchAllData}
               disabled={loading}
-              className="flex items-center gap-2"
+              className="px-3.5 py-2 bg-white border border-[#E2D8CC] hover:border-[#7A1526] rounded-xl text-xs sm:text-sm font-semibold text-[#2B1B17] transition flex items-center gap-2 cursor-pointer shadow-2xs"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Link to="/profiles">
-              <Button size="sm" className="flex items-center gap-1.5">
-                <Heart className="w-4 h-4" />
-                Browse Profiles
-              </Button>
+              <RefreshCw className={`w-3.5 h-3.5 text-[#7A1526] ${loading ? 'animate-spin' : ''}`} />
+              <span>{isMarathi ? 'रीफ्रेश' : 'Refresh'}</span>
+            </button>
+            <Link
+              to="/profiles"
+              className="px-4 py-2 bg-[#7A1526] hover:bg-[#8F1024] text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow-2xs"
+            >
+              <Heart className="w-3.5 h-3.5 fill-current text-[#D9C39E]" />
+              <span>{isMarathi ? 'स्थळे शोधा' : 'Browse Profiles'}</span>
             </Link>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
+        <div className="flex border-b border-[#EAE0D2] mb-8 overflow-x-auto gap-2">
           <button
+            type="button"
             onClick={() => handleTabChange('received')}
-            className={`flex items-center gap-2 py-3 px-4 sm:px-6 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 py-3 px-4 sm:px-6 font-semibold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap cursor-pointer rounded-t-xl ${
               activeTab === 'received'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-lg'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-[#7A1526] text-[#7A1526] bg-[#F8F3EA]/70'
+                : 'border-transparent text-[#7A6E65] hover:text-[#2B1B17] hover:border-[#EAE0D2]'
             }`}
           >
             <Inbox className="w-4 h-4" />
-            <span>Received Requests</span>
+            <span>{isMarathi ? 'आलेल्या विनंत्या' : 'Received Requests'}</span>
             {counts.pending_received > 0 && (
-              <span className="px-2 py-0.5 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
+              <span className="px-2 py-0.5 text-[11px] font-bold bg-[#7A1526] text-white rounded-full">
                 {counts.pending_received}
               </span>
             )}
           </button>
 
           <button
-            onClick={() => handleTabChange('sent')}
-            className={`flex items-center gap-2 py-3 px-4 sm:px-6 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'sent'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-lg'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            type="button"
+            onClick={() => handleTabChange('matches')}
+            className={`flex items-center gap-2 py-3 px-4 sm:px-6 font-semibold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap cursor-pointer rounded-t-xl ${
+              activeTab === 'matches'
+                ? 'border-[#7A1526] text-[#7A1526] bg-[#F8F3EA]/70'
+                : 'border-transparent text-[#7A6E65] hover:text-[#2B1B17] hover:border-[#EAE0D2]'
             }`}
           >
-            <Send className="w-4 h-4" />
-            <span>Sent Requests</span>
-            {counts.sent_pending > 0 && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
-                {counts.sent_pending}
+            <HeartHandshake className="w-4 h-4" />
+            <span>{isMarathi ? 'जुळलेली स्थळे' : 'Mutual Matches'}</span>
+            {counts.matches > 0 && (
+              <span className="px-2 py-0.5 text-[11px] font-bold bg-green-700 text-white rounded-full">
+                {counts.matches}
               </span>
             )}
           </button>
 
           <button
-            onClick={() => handleTabChange('matches')}
-            className={`flex items-center gap-2 py-3 px-4 sm:px-6 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'matches'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-lg'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            type="button"
+            onClick={() => handleTabChange('sent')}
+            className={`flex items-center gap-2 py-3 px-4 sm:px-6 font-semibold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap cursor-pointer rounded-t-xl ${
+              activeTab === 'sent'
+                ? 'border-[#7A1526] text-[#7A1526] bg-[#F8F3EA]/70'
+                : 'border-transparent text-[#7A6E65] hover:text-[#2B1B17] hover:border-[#EAE0D2]'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Mutual Matches</span>
-            {counts.matches > 0 && (
-              <span className="px-2 py-0.5 text-xs font-semibold bg-green-600 text-white rounded-full">
-                {counts.matches}
+            <Send className="w-4 h-4" />
+            <span>{isMarathi ? 'पाठवलेली पसंती' : 'Sent Interests'}</span>
+            {counts.sent_pending > 0 && (
+              <span className="px-2 py-0.5 text-[11px] font-bold bg-[#B88E4B] text-white rounded-full">
+                {counts.sent_pending}
               </span>
             )}
           </button>
         </div>
 
-        {/* ========================================================================= */}
-        {/* Loading State */}
-        {/* ========================================================================= */}
-        {loading ? (
-          <div className="py-20 text-center flex flex-col items-center justify-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-primary mb-3" />
-            <p className="text-sm font-medium text-gray-500">Loading your interests and matches...</p>
-          </div>
-        ) : (
+        {/* Tab 1: Received Interests */}
+        {activeTab === 'received' && (
           <div>
-            {/* ===================================================================== */}
-            {/* TAB 1: RECEIVED INTERESTS */}
-            {/* ===================================================================== */}
-            {activeTab === 'received' && (
-              <div>
-                {receivedInterests.length === 0 ? (
-                  <Card className="py-16 text-center border-dashed">
-                    <CardContent className="space-y-4">
-                      <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
-                        <Inbox className="w-8 h-8" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900">No Interests Received Yet</h3>
-                      <p className="text-sm text-gray-500 max-w-md mx-auto">
-                        When other approved members express interest in your profile, their requests will appear here for you to accept or decline.
-                      </p>
-                      <div className="pt-2">
-                        <Link to="/profiles">
-                          <Button>Browse Profiles</Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {receivedInterests.map((interest) => {
-                      const c = interest.candidate;
-                      const fullName = `${c?.firstName || c?.first_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
-                      const age = calculateAge(c?.dob || c?.date_of_birth);
-                      const photo = c?.primary_photo || c?.photos?.[0] || DEFAULT_AVATAR;
-                      const isPending = interest.status === 'pending';
-                      const isAccepted = interest.status === 'accepted';
-                      const isDeclined = interest.status === 'declined';
+            {loading ? (
+              <div className="text-center py-16">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#7A1526] border-t-transparent mx-auto mb-3"></div>
+                <p className="text-xs sm:text-sm text-[#7A6E65]">{isMarathi ? 'विनंत्या लोड होत आहेत...' : 'Loading received requests...'}</p>
+              </div>
+            ) : receivedInterests.length === 0 ? (
+              <div className="text-center py-16 bg-white/95 border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-8 shadow-xs">
+                <div className="w-14 h-14 bg-[#F8F3EA] border border-[#D9C39E] rounded-full flex items-center justify-center mx-auto text-[#7A1526] mb-3 shadow-2xs">
+                  <Inbox className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17] mb-1">
+                  {isMarathi ? 'सध्या कोणतीही पसंती विनंती आलेली नाही' : 'No Received Requests Yet'}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6B5E55] max-w-md mx-auto mb-6">
+                  {isMarathi 
+                    ? 'इतर सभासदांकडून पसंती आल्यास त्या येथे दिसतील. आपणही शोध सूचीमधून योग्य स्थळांना पसंती पाठवू शकता.'
+                    : 'When other members express interest in your profile, their requests will appear here.'}
+                </p>
+                <Link
+                  to="/profiles"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#7A1526] hover:bg-[#8F1024] text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xs"
+                >
+                  <Heart className="w-4 h-4 fill-current text-[#D9C39E]" />
+                  <span>{isMarathi ? 'स्थळे शोधा' : 'Browse Profiles'}</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {receivedInterests.map((interest) => {
+                  const candidate = interest.candidate || {};
+                  const candAge = calculateAge(candidate.dob || candidate.date_of_birth);
+                  const candName = `${candidate.firstName || candidate.first_name || ''} ${candidate.lastName || candidate.last_name || ''}`.trim() || (isMarathi ? 'उमेदवार' : 'Candidate');
+                  const candPhoto = candidate.primary_photo || candidate.photos?.[0] || DEFAULT_AVATAR;
+                  const isAccepted = interest.status === 'accepted';
+                  const isDeclined = interest.status === 'declined';
+                  const isPending = interest.status === 'pending';
 
-                      return (
-                        <Card key={interest.id} className="overflow-hidden border-gray-200 hover:shadow-md transition-shadow group flex flex-col h-full">
-                          {/* Photo and Status Badge */}
-                          <div className="relative aspect-[4/5] w-full bg-muted overflow-hidden flex items-center justify-center">
+                  return (
+                    <div
+                      key={interest.id}
+                      className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between transition hover:border-[#D9C39E]"
+                    >
+                      <div className="p-5">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-16 h-20 rounded-xl overflow-hidden bg-[#FAF7F2] border border-[#EAE0D2] shrink-0">
                             <img
-                              src={photo}
-                              alt={fullName}
-                              loading="lazy"
-                              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                              src={candPhoto}
+                              alt={candName}
+                              className="w-full h-full object-cover object-center"
                               onError={handleImageError}
                             />
-                            <div className="absolute top-3 right-3">
-                              {isPending && (
-                                <span className="px-2.5 py-1 text-xs font-semibold bg-amber-500 text-white rounded-full shadow-sm flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5" />
-                                  Pending Response
-                                </span>
-                              )}
-                              {isAccepted && (
-                                <span className="px-2.5 py-1 text-xs font-semibold bg-green-600 text-white rounded-full shadow-sm flex items-center gap-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Matched
-                                </span>
-                              )}
-                              {isDeclined && (
-                                <span className="px-2.5 py-1 text-xs font-semibold bg-gray-600 text-white rounded-full shadow-sm flex items-center gap-1">
-                                  <XCircle className="w-3.5 h-3.5" />
-                                  Declined
-                                </span>
-                              )}
-                            </div>
-                            <div className="absolute bottom-3 left-3 text-white text-xs bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">
-                              Received {dayjs(interest.created_at).format('DD MMM YYYY')}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-serif font-bold text-[#2B1B17] text-base truncate mb-0.5">
+                              {candName}
+                            </h3>
+                            <div className="text-xs text-[#7A6E65] space-y-0.5">
+                              {candAge && <p>{candAge} {isMarathi ? 'वर्षे' : 'yrs'}</p>}
+                              {candidate.city && <p className="truncate">{candidate.city}{candidate.state ? `, ${candidate.state}` : ''}</p>}
+                              {candidate.caste && <p className="truncate font-medium text-[#7A1526]">{candidate.caste}</p>}
                             </div>
                           </div>
+                        </div>
 
-                          <CardContent className="p-5 space-y-4">
-                            {/* Candidate Info */}
-                            <div>
-                              <h3 className="text-lg font-bold text-gray-900 mb-1">
-                                {fullName}
-                              </h3>
-                              <div className="flex items-center gap-3 text-xs text-gray-500">
-                                {age !== null && <span>{age} yrs</span>}
-                                {c?.gender && <span className="capitalize">• {c.gender}</span>}
-                                {c?.city && (
-                                  <span className="flex items-center gap-1">
-                                    • <MapPin className="w-3 h-3 text-gray-400" />
-                                    {c.city}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
+                        {/* Status Badge */}
+                        <div className="mb-3">
+                          {isPending && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#FFFBF2] border border-[#E9D8B4] text-[#7A5416]">
+                              <Clock className="w-3 h-3 text-[#B88E4B]" />
+                              <span>{isMarathi ? 'प्रतिसादाची प्रतीक्षा' : 'Pending Your Response'}</span>
+                            </span>
+                          )}
+                          {isAccepted && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#F4F9F4] border border-[#CDE4CD] text-green-800">
+                              <CheckCircle2 className="w-3 h-3 text-green-600" />
+                              <span>{isMarathi ? 'स्वीकारले • परस्पर जुळणी' : 'Accepted • Mutual Match'}</span>
+                            </span>
+                          )}
+                          {isDeclined && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                              <XCircle className="w-3 h-3" />
+                              <span>{isMarathi ? 'नाकारले' : 'Declined'}</span>
+                            </span>
+                          )}
+                        </div>
 
-                            {/* Community & Career details */}
-                            <div className="space-y-1.5 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg">
-                              {c?.caste && (
-                                <div>
-                                  <span className="text-gray-400">Caste:</span> {c.caste} {c.sub_caste || c.subCaste ? `(${c.sub_caste || c.subCaste})` : ''}
-                                </div>
-                              )}
-                              {c?.education && (
-                                <div className="flex items-center gap-1.5 truncate">
-                                  <GraduationCap className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                                  <span className="truncate">{c.education}</span>
-                                </div>
-                              )}
-                              {c?.occupation && (
-                                <div className="flex items-center gap-1.5 truncate">
-                                  <Briefcase className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                                  <span className="truncate">{c.occupation}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Custom Message if any */}
-                            {interest.message && (
-                              <div className="p-2.5 bg-primary/5 border border-primary/10 rounded-lg text-xs text-gray-700 italic flex items-start gap-1.5">
-                                <MessageSquare className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-                                <span>"{interest.message}"</span>
-                              </div>
-                            )}
-
-                            {/* Unlocked Contact Details if accepted */}
-                            {isAccepted && interest.contacts && (
-                              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-900 space-y-1.5">
-                                <div className="font-semibold text-green-800 flex items-center gap-1 mb-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Contact Details Unlocked:
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Phone className="w-3.5 h-3.5 text-green-700" />
-                                  <a href={`tel:${interest.contacts.phone}`} className="font-medium hover:underline">
-                                    {interest.contacts.phone}
-                                  </a>
-                                </div>
-                                {interest.contacts.contact_email && (
-                                  <div className="flex items-center gap-2">
-                                    <Mail className="w-3.5 h-3.5 text-green-700" />
-                                    <a href={`mailto:${interest.contacts.contact_email}`} className="font-medium hover:underline">
-                                      {interest.contacts.contact_email}
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Actions */}
-                            <div className="pt-2 flex items-center gap-2">
-                              <Link to={`/profiles/${c?.id}`} className="flex-1">
-                                <Button variant="outline" size="sm" className="w-full text-xs">
-                                  <Eye className="w-3.5 h-3.5 mr-1" />
-                                  View Profile
-                                </Button>
-                              </Link>
-
-                              {isPending && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => setAcceptingInterest(interest)}
-                                    className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 font-medium"
-                                  >
-                                    Accept
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setDecliningInterest(interest)}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs px-2.5"
-                                  >
-                                    Decline
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ===================================================================== */}
-            {/* TAB 2: SENT INTERESTS */}
-            {/* ===================================================================== */}
-            {activeTab === 'sent' && (
-              <div>
-                {sentInterests.length === 0 ? (
-                  <Card className="py-16 text-center border-dashed">
-                    <CardContent className="space-y-4">
-                      <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
-                        <Send className="w-8 h-8" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900">No Sent Interests</h3>
-                      <p className="text-sm text-gray-500 max-w-md mx-auto">
-                        Browse approved matrimonial profiles on KadamVivah and send interest to connect with compatible matches.
-                      </p>
-                      <div className="pt-2">
-                        <Link to="/profiles">
-                          <Button>Browse Profiles</Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {sentInterests.map((interest) => {
-                      const c = interest.candidate;
-                      const fullName = `${c?.firstName || c?.first_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
-                      const age = calculateAge(c?.dob || c?.date_of_birth);
-                      const photo = c?.primary_photo || c?.photos?.[0] || DEFAULT_AVATAR;
-                      const isPending = interest.status === 'pending';
-                      const isAccepted = interest.status === 'accepted';
-                      const isDeclined = interest.status === 'declined';
-
-                      return (
-                        <Card key={interest.id} className="overflow-hidden border-gray-200 hover:shadow-md transition-shadow group flex flex-col h-full">
-                          <div className="relative aspect-[4/5] w-full bg-muted overflow-hidden flex items-center justify-center">
-                            <img
-                              src={photo}
-                              alt={fullName}
-                              loading="lazy"
-                              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                              onError={handleImageError}
-                            />
-                            <div className="absolute top-3 right-3">
-                              {isPending && (
-                                <span className="px-2.5 py-1 text-xs font-semibold bg-amber-500 text-white rounded-full shadow-sm flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5" />
-                                  Pending Response
-                                </span>
-                              )}
-                              {isAccepted && (
-                                <span className="px-2.5 py-1 text-xs font-semibold bg-green-600 text-white rounded-full shadow-sm flex items-center gap-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Accepted
-                                </span>
-                              )}
-                              {isDeclined && (
-                                <span className="px-2.5 py-1 text-xs font-semibold bg-gray-500 text-white rounded-full shadow-sm flex items-center gap-1">
-                                  <XCircle className="w-3.5 h-3.5" />
-                                  Declined
-                                </span>
-                              )}
-                            </div>
-                            <div className="absolute bottom-3 left-3 text-white text-xs bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">
-                              Sent {dayjs(interest.created_at).format('DD MMM YYYY')}
-                            </div>
+                        {/* Candidate Message if any */}
+                        {interest.message && (
+                          <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#EAE0D2] text-xs text-[#6B5E55] mb-3 flex items-start gap-2 italic">
+                            <MessageSquare className="w-3.5 h-3.5 text-[#B88E4B] shrink-0 mt-0.5 not-italic" />
+                            <span>"{interest.message}"</span>
                           </div>
+                        )}
 
-                          <CardContent className="p-5 space-y-4">
-                            <div>
-                              <h3 className="text-lg font-bold text-gray-900 mb-1">
-                                {fullName}
-                              </h3>
-                              <div className="flex items-center gap-3 text-xs text-gray-500">
-                                {age !== null && <span>{age} yrs</span>}
-                                {c?.gender && <span className="capitalize">• {c.gender}</span>}
-                                {c?.city && (
-                                  <span className="flex items-center gap-1">
-                                    • <MapPin className="w-3 h-3 text-gray-400" />
-                                    {c.city}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="space-y-1.5 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg">
-                              {c?.caste && (
-                                <div>
-                                  <span className="text-gray-400">Caste:</span> {c.caste}
-                                </div>
-                              )}
-                              {c?.education && (
-                                <div className="flex items-center gap-1.5 truncate">
-                                  <GraduationCap className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                                  <span className="truncate">{c.education}</span>
-                                </div>
-                              )}
-                              {c?.occupation && (
-                                <div className="flex items-center gap-1.5 truncate">
-                                  <Briefcase className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                                  <span className="truncate">{c.occupation}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Unlocked Contact Details if accepted */}
-                            {isAccepted && interest.contacts && (
-                              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-900 space-y-1.5">
-                                <div className="font-semibold text-green-800 flex items-center gap-1 mb-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Contact Details Unlocked:
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Phone className="w-3.5 h-3.5 text-green-700" />
-                                  <a href={`tel:${interest.contacts.phone}`} className="font-medium hover:underline">
-                                    {interest.contacts.phone}
-                                  </a>
-                                </div>
-                                {interest.contacts.contact_email && (
-                                  <div className="flex items-center gap-2">
-                                    <Mail className="w-3.5 h-3.5 text-green-700" />
-                                    <a href={`mailto:${interest.contacts.contact_email}`} className="font-medium hover:underline">
-                                      {interest.contacts.contact_email}
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            <div className="pt-2">
-                              <Link to={`/profiles/${c?.id}`}>
-                                <Button variant="outline" size="sm" className="w-full text-xs">
-                                  <Eye className="w-3.5 h-3.5 mr-1" />
-                                  View Profile
-                                </Button>
-                              </Link>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ===================================================================== */}
-            {/* TAB 3: MUTUAL MATCHES / ACCEPTED */}
-            {/* ===================================================================== */}
-            {activeTab === 'matches' && (
-              <div>
-                {matches.length === 0 ? (
-                  <Card className="py-16 text-center border-dashed">
-                    <CardContent className="space-y-4">
-                      <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                        <Sparkles className="w-8 h-8" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900">No Mutual Matches Yet</h3>
-                      <p className="text-sm text-gray-500 max-w-md mx-auto">
-                        When an interest request is mutually accepted, candidate contact details unlock automatically and the match will appear here.
-                      </p>
-                      <div className="pt-2">
-                        <Link to="/profiles">
-                          <Button>Browse Approved Profiles</Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-                      <div className="p-2 bg-green-600 text-white rounded-lg">
-                        <ShieldCheck className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-green-900">Mutual Matches & Contact Directory</h4>
-                        <p className="text-xs text-green-700">
-                          These members have mutually accepted connections with you. Verified contact details are available below.
+                        <p className="text-[11px] text-[#A89D91]">
+                          {isMarathi ? 'तारीख:' : 'Received:'} {dayjs(interest.created_at).format('DD MMM YYYY')}
                         </p>
                       </div>
+
+                      {/* Action buttons */}
+                      <div className="p-4 bg-[#FAF7F2] border-t border-[#EAE0D2]/70 flex items-center justify-between gap-2">
+                        {isPending ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setAcceptingInterest(interest)}
+                              className="flex-1 py-2 px-3 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{isMarathi ? 'स्वीकारा' : 'Accept'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDecliningInterest(interest)}
+                              className="py-2 px-3 bg-white border border-red-200 text-red-700 hover:bg-red-50 text-xs font-semibold rounded-xl transition cursor-pointer"
+                            >
+                              <span>{isMarathi ? 'नाकारा' : 'Decline'}</span>
+                            </button>
+                          </>
+                        ) : (
+                          <Link
+                            to={`/profiles/${candidate.id || interest.sender_profile_id}`}
+                            className="w-full py-2 px-3 bg-white border border-[#E2D8CC] hover:border-[#7A1526] text-[#7A1526] text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>{isMarathi ? 'संपूर्ण प्रोफाइल पहा' : 'View Full Profile'}</span>
+                          </Link>
+                        )}
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {matches.map((match) => {
-                        const c = match.candidate;
-                        const fullName = `${c?.firstName || c?.first_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
-                        const age = calculateAge(c?.dob || c?.date_of_birth);
-                        const photo = c?.primary_photo || c?.photos?.[0] || DEFAULT_AVATAR;
-                        const contacts = match.contacts || {};
+        {/* Tab 2: Mutual Matches */}
+        {activeTab === 'matches' && (
+          <div>
+            {loading ? (
+              <div className="text-center py-16">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#7A1526] border-t-transparent mx-auto mb-3"></div>
+                <p className="text-xs sm:text-sm text-[#7A6E65]">{isMarathi ? 'जुळलेली स्थळे लोड होत आहेत...' : 'Loading matches...'}</p>
+              </div>
+            ) : matches.length === 0 ? (
+              <div className="text-center py-16 bg-white/95 border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-8 shadow-xs">
+                <div className="w-14 h-14 bg-[#F8F3EA] border border-[#D9C39E] rounded-full flex items-center justify-center mx-auto text-[#7A1526] mb-3 shadow-2xs">
+                  <HeartHandshake className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17] mb-1">
+                  {isMarathi ? 'अद्याप कोणतेही जुळलेले स्थळ नाही' : 'No Mutual Matches Yet'}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6B5E55] max-w-md mx-auto mb-6">
+                  {isMarathi 
+                    ? 'जेव्हा आपण पाठवलेली पसंती दुसऱ्या सभासदाने स्वीकारली असेल किंवा आपण दुसऱ्यांची पसंती स्वीकारली असेल, तेव्हा परस्पर संपर्क अनलॉक होतो.'
+                    : 'When you accept an interest request or another member accepts yours, mutual contact details are unlocked here.'}
+                </p>
+                <Link
+                  to="/profiles"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#7A1526] hover:bg-[#8F1024] text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xs"
+                >
+                  <Heart className="w-4 h-4 fill-current text-[#D9C39E]" />
+                  <span>{isMarathi ? 'स्थळे शोधा' : 'Browse Profiles'}</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {matches.map((match) => {
+                  const candidate = match.candidate || {};
+                  const candAge = calculateAge(candidate.dob || candidate.date_of_birth);
+                  const candName = `${candidate.firstName || candidate.first_name || ''} ${candidate.lastName || candidate.last_name || ''}`.trim() || (isMarathi ? 'उमेदवार' : 'Candidate');
+                  const candPhoto = candidate.primary_photo || candidate.photos?.[0] || DEFAULT_AVATAR;
+                  const contacts = match.contacts || candidate.contacts || {};
 
-                        return (
-                          <Card key={match.interest_id} className="overflow-hidden border-green-200 shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full">
-                            <div className="relative aspect-[4/5] w-full bg-muted overflow-hidden flex items-center justify-center">
-                              <img
-                                src={photo}
-                                alt={fullName}
-                                loading="lazy"
-                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                                onError={handleImageError}
-                              />
-                              <div className="absolute top-3 right-3">
-                                <span className="px-3 py-1 text-xs font-bold bg-green-600 text-white rounded-full shadow flex items-center gap-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Mutual Match
-                                </span>
-                              </div>
-                              <div className="absolute bottom-3 left-3 text-white text-xs bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">
-                                Matched {dayjs(match.matched_at).format('DD MMM YYYY')}
-                              </div>
+                  return (
+                    <div
+                      key={match.id}
+                      className="bg-white/95 backdrop-blur-xs border border-[#CDE4CD] rounded-2xl overflow-hidden shadow-xs"
+                    >
+                      <div className="p-5 sm:p-6">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-20 h-24 rounded-xl overflow-hidden bg-[#FAF7F2] border border-[#EAE0D2] shrink-0">
+                            <img
+                              src={candPhoto}
+                              alt={candName}
+                              className="w-full h-full object-cover object-center"
+                              onError={handleImageError}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3 className="font-serif font-bold text-[#2B1B17] text-lg truncate">
+                                {candName}
+                              </h3>
+                              <span className="px-2.5 py-0.5 bg-green-100 text-green-800 text-[11px] font-bold rounded-full">
+                                {isMarathi ? 'परस्पर पसंती' : 'Mutual Match'}
+                              </span>
                             </div>
 
-                            <CardContent className="p-5 space-y-4">
-                              <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-1">{fullName}</h3>
-                                <div className="flex items-center gap-3 text-xs text-gray-500">
-                                  {age !== null && <span>{age} yrs</span>}
-                                  {c?.gender && <span className="capitalize">• {c.gender}</span>}
-                                  {c?.city && <span>• {c.city}, {c.state}</span>}
-                                </div>
+                            <div className="text-xs text-[#7A6E65] space-y-0.5">
+                              {candAge && <p>{candAge} {isMarathi ? 'वर्षे' : 'years'}</p>}
+                              {candidate.city && <p>{candidate.city}{candidate.state ? `, ${candidate.state}` : ''}</p>}
+                              {candidate.caste && <p className="font-medium text-[#7A1526]">{candidate.caste}</p>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Unlocked Contact Details Box */}
+                        <div className="p-4 bg-[#F4F9F4] border border-green-200 rounded-xl space-y-2.5 mb-4">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-green-900">
+                            <ShieldCheck className="w-4 h-4 text-green-700 shrink-0" />
+                            <span>{isMarathi ? 'थेट संपर्क माहिती (अनलॉक)' : 'Unlocked Contact Details'}</span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            {contacts.phone && (
+                              <div className="p-2.5 bg-white rounded-lg border border-green-200">
+                                <span className="text-[11px] text-[#7A6E65] block">{isMarathi ? 'मोबाईल क्रमांक:' : 'Phone:'}</span>
+                                <a href={`tel:${contacts.phone}`} className="font-bold text-[#2B1B17] hover:text-green-800">
+                                  {contacts.phone}
+                                </a>
                               </div>
-
-                              {/* Unlocked Contacts Box */}
-                              <div className="p-4 bg-green-50/80 border border-green-200 rounded-xl space-y-3">
-                                <div className="text-xs font-bold text-green-900 uppercase tracking-wider flex items-center gap-1.5">
-                                  <ShieldCheck className="w-4 h-4 text-green-600" />
-                                  Verified Contact Details
-                                </div>
-
-                                {contacts.phone && (
-                                  <div className="flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-2 text-gray-700">
-                                      <Phone className="w-4 h-4 text-green-600" />
-                                      <span className="font-semibold text-gray-900">{contacts.phone}</span>
-                                    </div>
-                                    <a
-                                      href={`tel:${contacts.phone}`}
-                                      className="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded font-medium transition-colors"
-                                    >
-                                      Call
-                                    </a>
-                                  </div>
-                                )}
-
-                                {contacts.alternate_phone && (
-                                  <div className="flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-2 text-gray-700">
-                                      <Phone className="w-4 h-4 text-gray-400" />
-                                      <span>Alt / WhatsApp: {contacts.alternate_phone}</span>
-                                    </div>
-                                    <a
-                                      href={`tel:${contacts.alternate_phone}`}
-                                      className="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded transition-colors"
-                                    >
-                                      Call
-                                    </a>
-                                  </div>
-                                )}
-
-                                {contacts.contact_email && (
-                                  <div className="flex items-center justify-between text-xs pt-1 border-t border-green-200/60">
-                                    <div className="flex items-center gap-2 text-gray-700 truncate mr-2">
-                                      <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                      <span className="truncate">{contacts.contact_email}</span>
-                                    </div>
-                                    <a
-                                      href={`mailto:${contacts.contact_email}`}
-                                      className="px-2.5 py-1 bg-green-100 hover:bg-green-200 text-green-800 text-xs rounded font-medium transition-colors flex-shrink-0"
-                                    >
-                                      Email
-                                    </a>
-                                  </div>
-                                )}
+                            )}
+                            {contacts.alternate_phone && (
+                              <div className="p-2.5 bg-white rounded-lg border border-green-200">
+                                <span className="text-[11px] text-[#7A6E65] block">{isMarathi ? 'पर्यायी क्रमांक:' : 'Alt Phone:'}</span>
+                                <a href={`tel:${contacts.alternate_phone}`} className="font-bold text-[#2B1B17] hover:text-green-800">
+                                  {contacts.alternate_phone}
+                                </a>
                               </div>
-
-                              <div className="pt-1">
-                                <Link to={`/profiles/${c?.id}`}>
-                                  <Button variant="outline" size="sm" className="w-full text-xs">
-                                    <Eye className="w-3.5 h-3.5 mr-1" />
-                                    View Full Profile
-                                  </Button>
-                                </Link>
+                            )}
+                            {contacts.contact_email && (
+                              <div className="p-2.5 bg-white rounded-lg border border-green-200 sm:col-span-2">
+                                <span className="text-[11px] text-[#7A6E65] block">{isMarathi ? 'ईमेल पत्ता:' : 'Email:'}</span>
+                                <a href={`mailto:${contacts.contact_email}`} className="font-bold text-[#2B1B17] hover:text-green-800 truncate block">
+                                  {contacts.contact_email}
+                                </a>
                               </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-[11px] text-[#A89D91]">
+                            {isMarathi ? 'जुळल्याची तारीख:' : 'Connected:'} {dayjs(match.updated_at || match.created_at).format('DD MMM YYYY')}
+                          </span>
+                          <Link
+                            to={`/profiles/${candidate.id}`}
+                            className="px-4 py-2 bg-white border border-[#E2D8CC] hover:border-[#7A1526] text-[#7A1526] text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>{isMarathi ? 'बायोडाटा पहा' : 'View Biodata'}</span>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 3: Sent Interests */}
+        {activeTab === 'sent' && (
+          <div>
+            {loading ? (
+              <div className="text-center py-16">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#7A1526] border-t-transparent mx-auto mb-3"></div>
+                <p className="text-xs sm:text-sm text-[#7A6E65]">{isMarathi ? 'पाठवलेली पसंती लोड होत आहे...' : 'Loading sent requests...'}</p>
+              </div>
+            ) : sentInterests.length === 0 ? (
+              <div className="text-center py-16 bg-white/95 border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-8 shadow-xs">
+                <div className="w-14 h-14 bg-[#F8F3EA] border border-[#D9C39E] rounded-full flex items-center justify-center mx-auto text-[#7A1526] mb-3 shadow-2xs">
+                  <Send className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17] mb-1">
+                  {isMarathi ? 'अद्याप कोणत्याही स्थळास पसंती पाठवलेली नाही' : 'No Sent Interests Yet'}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6B5E55] max-w-md mx-auto mb-6">
+                  {isMarathi 
+                    ? 'शोध सूचीमधील योग्य प्रोफाइल निवडून आपण पसंती पाठवू शकता.'
+                    : 'Browse through matrimonial profiles and click "Send Interest" to connect.'}
+                </p>
+                <Link
+                  to="/profiles"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#7A1526] hover:bg-[#8F1024] text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-xs"
+                >
+                  <Heart className="w-4 h-4 fill-current text-[#D9C39E]" />
+                  <span>{isMarathi ? 'स्थळे शोधा' : 'Browse Profiles'}</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sentInterests.map((interest) => {
+                  const candidate = interest.candidate || {};
+                  const candAge = calculateAge(candidate.dob || candidate.date_of_birth);
+                  const candName = `${candidate.firstName || candidate.first_name || ''} ${candidate.lastName || candidate.last_name || ''}`.trim() || (isMarathi ? 'उमेदवार' : 'Candidate');
+                  const candPhoto = candidate.primary_photo || candidate.photos?.[0] || DEFAULT_AVATAR;
+                  const isAccepted = interest.status === 'accepted';
+                  const isDeclined = interest.status === 'declined';
+                  const isPending = interest.status === 'pending';
+
+                  return (
+                    <div
+                      key={interest.id}
+                      className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between"
+                    >
+                      <div className="p-5">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-16 h-20 rounded-xl overflow-hidden bg-[#FAF7F2] border border-[#EAE0D2] shrink-0">
+                            <img
+                              src={candPhoto}
+                              alt={candName}
+                              className="w-full h-full object-cover object-center"
+                              onError={handleImageError}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-serif font-bold text-[#2B1B17] text-base truncate mb-0.5">
+                              {candName}
+                            </h3>
+                            <div className="text-xs text-[#7A6E65] space-y-0.5">
+                              {candAge && <p>{candAge} {isMarathi ? 'वर्षे' : 'yrs'}</p>}
+                              {candidate.city && <p className="truncate">{candidate.city}{candidate.state ? `, ${candidate.state}` : ''}</p>}
+                              {candidate.caste && <p className="truncate font-medium text-[#7A1526]">{candidate.caste}</p>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status Badge */}
+                        <div className="mb-3">
+                          {isPending && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#FFFBF2] border border-[#E9D8B4] text-[#7A5416]">
+                              <Clock className="w-3 h-3 text-[#B88E4B]" />
+                              <span>{isMarathi ? 'प्रतिसादाची प्रतीक्षा' : 'Awaiting Response'}</span>
+                            </span>
+                          )}
+                          {isAccepted && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#F4F9F4] border border-[#CDE4CD] text-green-800">
+                              <CheckCircle2 className="w-3 h-3 text-green-600" />
+                              <span>{isMarathi ? 'स्वीकारले • जुळणी झाली' : 'Accepted • Matched'}</span>
+                            </span>
+                          )}
+                          {isDeclined && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                              <XCircle className="w-3 h-3" />
+                              <span>{isMarathi ? 'नाकारले' : 'Declined'}</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-[11px] text-[#A89D91]">
+                          {isMarathi ? 'पाठवल्याची तारीख:' : 'Sent:'} {dayjs(interest.created_at).format('DD MMM YYYY')}
+                        </p>
+                      </div>
+
+                      <div className="p-4 bg-[#FAF7F2] border-t border-[#EAE0D2]/70">
+                        <Link
+                          to={`/profiles/${candidate.id || interest.receiver_profile_id}`}
+                          className="w-full py-2 px-3 bg-white border border-[#E2D8CC] hover:border-[#7A1526] text-[#7A1526] text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>{isMarathi ? 'प्रोफाइल पहा' : 'View Profile'}</span>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* ========================================================================= */}
-      {/* Accept Interest Confirmation Modal */}
-      {/* ========================================================================= */}
+      {/* Accept Modal */}
       {acceptingInterest && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !acceptLoading) {
               setAcceptingInterest(null);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-green-600 mb-4">
-              <div className="p-2.5 bg-green-50 rounded-xl">
-                <HeartHandshake className="w-6 h-6" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-[#F4F9F4] border border-[#CDE4CD] rounded-xl text-green-700">
+                <HeartHandshake className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Accept Interest Request?</h3>
-                <p className="text-xs text-gray-500">Mutual Connection on KadamVivah</p>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17]">
+                  {isMarathi ? 'पसंतीची विनंती स्वीकारायची आहे का?' : 'Accept Interest Request?'}
+                </h3>
+                <p className="text-xs text-[#7A6E65]">
+                  {acceptingInterest.candidate?.firstName || acceptingInterest.candidate?.first_name} {acceptingInterest.candidate?.lastName || acceptingInterest.candidate?.last_name}
+                </p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
-              You are about to accept the interest request from{' '}
-              <strong className="text-gray-900 font-semibold">
-                {acceptingInterest.candidate?.firstName || acceptingInterest.candidate?.first_name} {acceptingInterest.candidate?.lastName || acceptingInterest.candidate?.last_name}
-              </strong>.
+            <p className="text-xs sm:text-sm text-[#6B5E55] mb-4 leading-relaxed">
+              {isMarathi 
+                ? 'ही विनंती स्वीकारल्यास आपले थेट संपर्क क्रमांक व ईमेल एकमेकांना दृश्यमान होतील.'
+                : 'Upon accepting, your mutual contact numbers and email will become immediately unlocked.'}
             </p>
 
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800 mb-6 flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-              <span>
-                Upon accepting, your contact details (phone and email) will become visible to each other under <strong>Mutual Matches</strong>.
-              </span>
-            </div>
-
-            <div className="flex items-center justify-end gap-3">
-              <Button
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => setAcceptingInterest(null)}
                 disabled={acceptLoading}
+                className="px-4 py-2 border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
               >
-                Cancel
-              </Button>
-              <Button
+                {isMarathi ? 'रद्द करा' : 'Cancel'}
+              </button>
+              <button
                 type="button"
                 onClick={handleConfirmAccept}
                 disabled={acceptLoading}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium flex items-center gap-2"
+                className="px-5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs"
               >
                 {acceptLoading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Accepting...
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isMarathi ? 'स्वीकारत आहे...' : 'Accepting...'}</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    Accept Interest
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{isMarathi ? 'होय, स्वीकारा' : 'Accept Interest'}</span>
                   </>
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* Decline Interest Confirmation Modal */}
-      {/* ========================================================================= */}
+      {/* Decline Modal */}
       {decliningInterest && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !declineLoading) {
               setDecliningInterest(null);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-red-600 mb-4">
-              <div className="p-2.5 bg-red-50 rounded-xl">
-                <AlertCircle className="w-6 h-6" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-[#FDF2F2] border border-[#F5C2C7] rounded-xl text-[#9E1B32]">
+                <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Decline Interest Request?</h3>
-                <p className="text-xs text-gray-500">Decline Match Invitation</p>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17]">
+                  {isMarathi ? 'विनंती नाकारायची आहे का?' : 'Decline Interest Request?'}
+                </h3>
+                <p className="text-xs text-[#7A6E65]">
+                  {decliningInterest.candidate?.firstName || decliningInterest.candidate?.first_name} {decliningInterest.candidate?.lastName || decliningInterest.candidate?.last_name}
+                </p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to decline the interest request from{' '}
-              <strong className="text-gray-900 font-semibold">
-                {decliningInterest.candidate?.firstName || decliningInterest.candidate?.first_name} {decliningInterest.candidate?.lastName || decliningInterest.candidate?.last_name}
-              </strong>?
+            <p className="text-xs sm:text-sm text-[#6B5E55] mb-4 leading-relaxed">
+              {isMarathi 
+                ? 'आपली संपर्क माहिती पूर्णपणे गोपनीय राहील.'
+                : 'Your contact details will remain private and will not be shared.'}
             </p>
 
-            <p className="text-xs text-gray-500 mb-6">
-              Your contact details will remain private and will not be shared.
-            </p>
-
-            <div className="flex items-center justify-end gap-3">
-              <Button
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => setDecliningInterest(null)}
                 disabled={declineLoading}
+                className="px-4 py-2 border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
               >
-                Cancel
-              </Button>
-              <Button
+                {isMarathi ? 'रद्द करा' : 'Cancel'}
+              </button>
+              <button
                 type="button"
-                variant="destructive"
                 onClick={handleConfirmDecline}
                 disabled={declineLoading}
-                className="flex items-center gap-2"
+                className="px-5 py-2 bg-[#9E1B32] hover:bg-[#7A1526] text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs"
               >
                 {declineLoading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Declining...
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isMarathi ? 'नाकारत आहे...' : 'Declining...'}</span>
                   </>
                 ) : (
-                  'Decline Interest'
+                  <span>{isMarathi ? 'होय, नाकारा' : 'Decline Interest'}</span>
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>

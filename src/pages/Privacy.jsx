@@ -1,143 +1,145 @@
-import { Card, CardContent } from '../components/ui/card';
+import { useTranslation } from 'react-i18next';
+import { ShieldCheck, Sparkles } from 'lucide-react';
 
 /**
  * Privacy Policy Page
+ * 
+ * Styled with KadamVivah premium design system:
+ * - Warm Ivory (#FAF7F2) background
+ * - Deep Maroon (#7A1526) headings & accents
+ * - Antique Gold (#B88E4B) badges
+ * - Warm borders (#EAE0D2)
+ * - Strict Marathi & English single-language support
  */
 
 export const Privacy = () => {
+  const { i18n } = useTranslation();
+  const isMarathi = (i18n.language || 'en').startsWith('mr');
+
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Privacy Policy</h1>
-          <p className="text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+    <div className="min-h-screen bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Subtle background ambient pattern */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: 'radial-gradient(#7A1526 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-4xl mx-auto relative z-10">
+        
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-12">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-[#F8F3EA] border border-[#D9C39E] rounded-full text-xs font-semibold text-[#7A1526] shadow-2xs mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-[#B88E4B] shrink-0" />
+            <span className={isMarathi ? 'font-devanagari font-bold' : 'font-sans font-semibold'}>
+              {isMarathi ? 'गोपनीयता व डेटा सुरक्षा' : 'Data Privacy & Security'}
+            </span>
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-[#2B1B17] tracking-tight mb-2">
+            {isMarathi ? 'गोपनीयता धोरण' : 'Privacy Policy'}
+          </h1>
+
+          <p className="text-xs sm:text-sm text-[#7A6E65]">
+            {isMarathi ? 'शेवटचे अद्यतन: सप्टेंबर २०२६' : 'Last updated: September 2026'}
+          </p>
         </div>
 
-        <Card>
-          <CardContent className="p-8 prose prose-sm max-w-none">
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Introduction</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                KadamVivah ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy 
-                explains how we collect, use, disclose, and safeguard your information when you use our 
-                matrimonial service.
-              </p>
-            </section>
+        {/* Content Card */}
+        <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-xs space-y-8 text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
+          
+          <section className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-serif font-bold text-[#2B1B17]">
+              {isMarathi ? '१. प्रस्तावना' : '1. Introduction'}
+            </h2>
+            <p>
+              {isMarathi
+                ? 'कदम विवाह ("आम्ही", "आमचे") आपल्या गोपनीयतेचे रक्षण करण्यास कटिबद्ध आहे. हे धोरण आम्ही आपल्या विवाह सेवांच्या वापरादरम्यान माहिती कशा प्रकारे संकलित करतो, वापरतो आणि सुरक्षित ठेवतो हे स्पष्ट करते.'
+                : 'KadamVivah ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your personal information when you use our matrimonial platform.'}
+            </p>
+          </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Information We Collect</h2>
-              <h3 className="text-xl font-semibold mb-2">Personal Information</h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                When you register on KadamVivah, we collect the following information:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground mb-4">
-                <li>Name (first, middle, last)</li>
-                <li>Email address and phone number</li>
-                <li>Date of birth and gender</li>
-                <li>Location (city, state, pincode)</li>
-                <li>Community information (caste, sub-caste)</li>
-                <li>Education and occupation details</li>
-                <li>Family information</li>
-                <li>Photographs</li>
-                <li>Bio and personal description</li>
-              </ul>
-            </section>
+          <section className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-serif font-bold text-[#2B1B17]">
+              {isMarathi ? '२. संकलित केली जाणारी माहिती' : '2. Information We Collect'}
+            </h2>
+            <p>
+              {isMarathi
+                ? 'नोंदणी आणि प्रोफाइल निर्मिती दरम्यान आम्ही खालील माहिती संकलित करतो:'
+                : 'When you register on KadamVivah, we collect the following information for matrimonial profile purposes:'}
+            </p>
+            <ul className="list-disc list-inside space-y-1 pl-2">
+              <li>{isMarathi ? 'पूर्ण नाव, जन्मतारीख आणि लिंग' : 'Full Name, Date of Birth, and Gender'}</li>
+              <li>{isMarathi ? 'ईमेल पत्ता आणि मोबाईल क्रमांक' : 'Email Address and Mobile Phone Number'}</li>
+              <li>{isMarathi ? 'सध्याचे शहर, राज्य आणि पिनकोड' : 'Location (City, State, Pincode)'}</li>
+              <li>{isMarathi ? 'समाज व गोत्र माहिती' : 'Community details (Maratha/Deshmukh community, Gotra)'}</li>
+              <li>{isMarathi ? 'शैक्षणिक पात्रता, व्यवसाय आणि वार्षिक उत्पन्न' : 'Education, Profession, and Annual Income'}</li>
+              <li>{isMarathi ? 'कौटुंबिक माहिती आणि भावंडांची माहिती' : 'Family background and sibling details'}</li>
+              <li>{isMarathi ? 'बायोडाटा आणि प्रोफाइल छायाचित्रे' : 'Photographs and personal partner expectations'}</li>
+            </ul>
+          </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">How We Use Your Information</h2>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                We use the information we collect to:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Create and manage your matrimonial profile</li>
-                <li>Display your profile to other registered users</li>
-                <li>Facilitate communication between users</li>
-                <li>Improve our services and user experience</li>
-                <li>Send service-related notifications (if opted in)</li>
-                <li>Ensure platform security and prevent fraud</li>
-              </ul>
-            </section>
+          <section className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-serif font-bold text-[#2B1B17]">
+              {isMarathi ? '३. माहितीचा वापर' : '3. How We Use Your Information'}
+            </h2>
+            <ul className="list-disc list-inside space-y-1 pl-2">
+              <li>{isMarathi ? 'आपले विवाह प्रोफाइल तयार करणे आणि व्यवस्थापित करणे' : 'Creating and managing your matrimonial biodata profile'}</li>
+              <li>{isMarathi ? 'फक्त मंजूर सभासदांना शोध सूचीमध्ये प्रोफाइल दाखवणे' : 'Displaying approved profile details to matching community members'}</li>
+              <li>{isMarathi ? 'परस्पर पसंतीनंतर सुरक्षित संपर्क देवाणघेवाण सुलभ करणे' : 'Facilitating connection requests and mutual match communication'}</li>
+              <li>{isMarathi ? 'प्लॅटफॉर्मची सुरक्षितता राखणे आणि गैरवापर रोखणे' : 'Maintaining platform security and preventing unauthorized access'}</li>
+            </ul>
+          </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Information Sharing and Disclosure</h2>
-              <h3 className="text-xl font-semibold mb-2">With Other Users</h3>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                Your profile information, including contact details, is visible to all registered users of 
-                KadamVivah. This is essential for the matrimonial matchmaking purpose of our service.
-              </p>
-              
-              <h3 className="text-xl font-semibold mb-2">With Third Parties</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                We do not sell, trade, or rent your personal information to third parties. We may share 
-                information only in the following circumstances:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground mt-2">
-                <li>With your explicit consent</li>
-                <li>To comply with legal obligations</li>
-                <li>To protect our rights and safety</li>
-              </ul>
-            </section>
+          <section className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-serif font-bold text-[#2B1B17]">
+              {isMarathi ? '४. संपर्क गोपनीयतेचे नियम' : '4. Contact Privacy Rules'}
+            </h2>
+            <p>
+              {isMarathi
+                ? 'आपला थेट मोबाईल क्रमांक आणि ईमेल पत्ता सामान्य शोध परिणामांमध्ये कधीही उघडे केले जात नाहीत. जेव्हा दोन्ही सभासदांनी एकमेकांची पसंती स्वीकारली (Mutual Match) असेल, तेव्हाच संपर्क माहिती आपोआप अनलॉक होते.'
+                : 'Your direct phone numbers and email address are never displayed publicly in search listings. Contact details are only unlocked mutually after both candidates accept a connection request.'}
+            </p>
+          </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Data Security</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                We implement industry-standard security measures to protect your personal information. 
-                However, no method of transmission over the internet or electronic storage is 100% secure. 
-                While we strive to protect your information, we cannot guarantee absolute security.
-              </p>
-            </section>
+          <section className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-serif font-bold text-[#2B1B17]">
+              {isMarathi ? '५. डेटा सुरक्षा' : '5. Data Security'}
+            </h2>
+            <p>
+              {isMarathi
+                ? 'आम्ही खात्याची माहिती आणि वैयक्तिक माहिती सुरक्षित ठेवण्यासाठी वाजवी तांत्रिक व सुरक्षा उपाययोजना वापरतो, ज्यामध्ये सुरक्षित पासवर्ड हाताळणी आणि उत्पादन वेबसाइटवरील HTTPS चा समावेश आहे. आम्ही वापरकर्त्यांची माहिती कोणत्याही तृतीय पक्षाला विकत किंवा भाड्याने देत नाही.'
+                : 'We use reasonable technical and security measures to protect account credentials and personal information, including secure password handling and HTTPS on the production website. We do not sell or rent user data to third-party advertisers.'}
+            </p>
+          </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Your Rights</h2>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                You have the right to:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Access your personal information</li>
-                <li>Update or correct your information</li>
-                <li>Request deletion of your account and data</li>
-                <li>Opt out of non-essential communications</li>
-              </ul>
-            </section>
+          <section className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-serif font-bold text-[#2B1B17]">
+              {isMarathi ? '६. आपले अधिकार' : '6. Your Rights'}
+            </h2>
+            <p>
+              {isMarathi
+                ? 'आपण आपल्या खात्यातील माहिती कधीही अद्ययावत करू शकता किंवा सपोर्टशी संपर्क साधून खाते निष्क्रिय करण्याची विनंती करू शकता.'
+                : 'You have full rights to update your matrimonial profile details, replace photos, or request account closure anytime.'}
+            </p>
+          </section>
+        </div>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Cookies and Tracking</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                We use cookies and similar tracking technologies to improve your experience on our platform. 
-                You can control cookie settings through your browser preferences.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Children's Privacy</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Our service is intended for users aged 18 and above. We do not knowingly collect information 
-                from individuals under 18 years of age.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">Changes to This Policy</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                We may update this Privacy Policy from time to time. We will notify you of any significant 
-                changes by posting the new policy on this page and updating the "Last updated" date.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold mb-4">Contact Us</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                If you have any questions about this Privacy Policy, please contact us at:
-              </p>
-              <p className="text-primary font-semibold mt-2">
-                <a href="mailto:contact@kadamvivah.in" className="hover:underline">
-                  contact@kadamvivah.in
-                </a>
-              </p>
-            </section>
-          </CardContent>
-        </Card>
+        {/* Trust Line */}
+        <p className="text-center text-xs sm:text-sm text-[#7A6E65] mt-8 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-[#B88E4B] shrink-0" />
+          <span>
+            {isMarathi
+              ? 'मराठा व देशमुख विवाह • गोपनीयतेला प्राधान्य'
+              : 'Maratha & Deshmukh Matrimony • Privacy-Focused'}
+          </span>
+        </p>
       </div>
     </div>
   );
 };
+
+export default Privacy;

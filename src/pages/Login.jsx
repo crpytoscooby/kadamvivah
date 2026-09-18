@@ -1,24 +1,33 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, AlertCircle, Loader } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, Sparkles, ShieldCheck } from 'lucide-react';
 
 /**
  * Login Page
  * 
- * Email + password only login flow.
- * Redirects to password change if mustChangePassword is true.
+ * Styled with KadamVivah premium design system:
+ * - Warm Ivory (#FAF7F2) background
+ * - Deep Maroon (#7A1526) primary accents and buttons
+ * - Antique Gold (#B88E4B) badges and highlights
+ * - Warm borders (#EAE0D2) & refined card
+ * - Strict Marathi & English single-language support
+ * - Preserved authentication logic and show/hide password toggle
  */
 
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, loading: authLoading, logout, login } = useAuth();
+  const { i18n } = useTranslation();
+  const isMarathi = (i18n.language || 'en').startsWith('mr');
 
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +43,11 @@ export function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isAuthenticated()) {
-      setError('You are already logged in. Please log out first to switch accounts.');
+      setError(
+        isMarathi 
+          ? 'आपण आधीच लॉगिन आहात. खाते बदलण्यासाठी कृपया आधी लॉग आउट करा.'
+          : 'You are already logged in. Please log out first to switch accounts.'
+      );
       return;
     }
     setError('');
@@ -43,7 +56,11 @@ export function Login() {
     try {
       // Validation
       if (!formData.email || !formData.password) {
-        setError('Please enter both email and password');
+        setError(
+          isMarathi
+            ? 'कृपया ईमेल आणि पासवर्ड दोन्ही प्रविष्ट करा.'
+            : 'Please enter both email and password'
+        );
         setLoading(false);
         return;
       }
@@ -51,7 +68,11 @@ export function Login() {
       // Email validation
       const emailRegex = /^\S+@\S+\.\S+$/;
       if (!emailRegex.test(formData.email)) {
-        setError('Please enter a valid email address');
+        setError(
+          isMarathi
+            ? 'कृपया वैध ईमेल पत्ता प्रविष्ट करा.'
+            : 'Please enter a valid email address'
+        );
         setLoading(false);
         return;
       }
@@ -68,7 +89,7 @@ export function Login() {
         navigate(from);
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || err.message || (isMarathi ? 'लॉगिन अयशस्वी. कृपया पुन्हा प्रयत्न करा.' : 'Login failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -76,26 +97,57 @@ export function Login() {
 
   if (!authLoading && isAuthenticated()) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Already Signed In</h2>
-          <p className="text-sm text-gray-600 mb-6">
-            You are currently signed in as <strong className="text-gray-900">{user?.email}</strong> ({user?.firstName || user?.first_name} {user?.lastName || user?.last_name}).
+      <div className="min-h-[calc(100vh-140px)] bg-[#FAF7F2] flex items-center justify-center px-4 py-12 relative overflow-hidden">
+        {/* Subtle background ambient pattern */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.02]"
+          style={{
+            backgroundImage: 'radial-gradient(#7A1526 1px, transparent 1px)',
+            backgroundSize: '24px 24px'
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="w-full max-w-[450px] bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center shadow-sm relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#F8F3EA] border border-[#D9C39E] rounded-full text-xs font-semibold text-[#7A1526] shadow-2xs mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-[#B88E4B] shrink-0" />
+            <span className={isMarathi ? 'font-devanagari font-bold' : 'font-sans font-semibold'}>
+              {isMarathi ? 'सध्या सक्रिय सत्र' : 'Active Session'}
+            </span>
+          </div>
+
+          <h2 className="text-2xl font-serif font-bold text-[#2B1B17] mb-2">
+            {isMarathi ? 'आपण आधीच लॉगिन आहात' : 'Already Signed In'}
+          </h2>
+
+          <p className="text-xs sm:text-sm text-[#6B5E55] mb-6">
+            {isMarathi ? (
+              <>
+                आपण <strong className="text-[#2B1B17]">{user?.email}</strong> ({user?.firstName || user?.first_name} {user?.lastName || user?.last_name}) म्हणून लॉगिन आहात.
+              </>
+            ) : (
+              <>
+                You are currently signed in as <strong className="text-[#2B1B17]">{user?.email}</strong> ({user?.firstName || user?.first_name} {user?.lastName || user?.last_name}).
+              </>
+            )}
           </p>
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
+              type="button"
               onClick={() => navigate('/my-profile')}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200"
+              className="bg-[#7A1526] hover:bg-[#8F1024] text-white font-semibold py-2.5 px-4 rounded-xl transition duration-200 cursor-pointer text-sm"
             >
-              Go to My Profile
+              {isMarathi ? 'माझे प्रोफाइल पहा' : 'Go to My Profile'}
             </button>
             <button
+              type="button"
               onClick={async () => {
                 await logout();
               }}
-              className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition duration-200"
+              className="border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] font-semibold py-2.5 px-4 rounded-xl transition duration-200 cursor-pointer text-sm"
             >
-              Log Out
+              {isMarathi ? 'लॉग आउट करा' : 'Log Out'}
             </button>
           </div>
         </div>
@@ -104,44 +156,69 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-amber-900 mb-2">KadamVivah</h1>
-          <p className="text-amber-700">Marathi Matrimony Platform</p>
-        </div>
+    <div className="min-h-[calc(100vh-140px)] bg-[#FAF7F2] flex items-center justify-center px-4 py-10 sm:py-14 relative overflow-hidden">
+      {/* Subtle background ambient pattern */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: 'radial-gradient(#7A1526 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}
+        aria-hidden="true"
+      />
 
+      {/* Ambient warm glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-[#B88E4B]/5 blur-3xl pointer-events-none" />
+
+      <div className="w-full max-w-[450px] relative z-10">
         {/* Card */}
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Member Login</h2>
+        <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm">
+          {/* Eyebrow & Heading */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#F8F3EA] border border-[#D9C39E] rounded-full text-xs font-semibold text-[#7A1526] shadow-2xs mb-2.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#B88E4B] shrink-0" />
+              <span className={isMarathi ? 'font-devanagari font-bold' : 'font-sans font-semibold'}>
+                {isMarathi ? 'पुन्हा स्वागत आहे' : 'Welcome Back'}
+              </span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2B1B17] tracking-tight">
+              {isMarathi ? 'सदस्य लॉगिन' : 'Member Login'}
+            </h1>
+
+            <p className="text-xs sm:text-sm text-[#6B5E55] mt-1.5 leading-relaxed">
+              {isMarathi
+                ? 'योग्य जीवनसाथीच्या शोधासाठी आपल्या खात्यात लॉगिन करा.'
+                : 'Sign in to continue your search for a suitable life partner.'}
+            </p>
+          </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-red-700 text-sm">{error}</p>
+            <div className="mb-5 p-3.5 bg-[#FDF2F2] border border-[#F5C2C7] rounded-xl flex items-start gap-2.5 text-left">
+              <AlertCircle className="w-4 h-4 text-[#9E1B32] flex-shrink-0 mt-0.5" />
+              <p className="text-xs sm:text-sm text-[#7A1526] font-medium leading-snug">{error}</p>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+              <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-[#2B1B17] mb-1.5">
+                {isMarathi ? 'ईमेल पत्ता' : 'Email Address'}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9E8E81]" />
                 <input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="e.g. rahul@example.com"
+                  placeholder={isMarathi ? 'उदा. rahul@example.com' : 'e.g. rahul@example.com'}
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full h-11 sm:h-12 pl-10 pr-4 text-sm sm:text-base border border-[#E2D8CC] rounded-xl bg-white text-[#2B1B17] placeholder:text-[#A89D91] focus:outline-none focus:border-[#7A1526] focus:ring-2 focus:ring-[#7A1526]/15 disabled:bg-gray-50 transition duration-150"
                   required
                 />
               </div>
@@ -149,22 +226,34 @@ export function Login() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+              <label htmlFor="password" className="block text-xs sm:text-sm font-semibold text-[#2B1B17] mb-1.5">
+                {isMarathi ? 'पासवर्ड' : 'Password'}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9E8E81]" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full h-11 sm:h-12 pl-10 pr-11 text-sm sm:text-base border border-[#E2D8CC] rounded-xl bg-white text-[#2B1B17] placeholder:text-[#A89D91] focus:outline-none focus:border-[#7A1526] focus:ring-2 focus:ring-[#7A1526]/15 disabled:bg-gray-50 transition duration-150"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  aria-label={showPassword ? (isMarathi ? 'पासवर्ड लपवा' : 'Hide password') : (isMarathi ? 'पासवर्ड दाखवा' : 'Show password')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9E8E81] hover:text-[#2B1B17] focus:outline-none p-1 rounded transition-colors cursor-pointer"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -172,31 +261,39 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+              className="w-full h-11 sm:h-12 bg-[#7A1526] hover:bg-[#8F1024] disabled:bg-gray-400 text-white font-semibold text-sm sm:text-base rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] cursor-pointer"
             >
               {loading ? (
                 <>
-                  <Loader className="w-5 h-5 animate-spin" />
-                  Signing In...
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                  <span>{isMarathi ? 'लॉगिन होत आहे...' : 'Signing In...'}</span>
                 </>
               ) : (
-                'Sign In'
+                <span>{isMarathi ? 'लॉगिन करा' : 'Sign In'}</span>
               )}
             </button>
           </form>
 
           {/* Register Prompt */}
-          <div className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <a href="/register" className="font-semibold text-amber-700 hover:text-amber-800 underline">
-              Create a free profile
-            </a>
+          <div className="mt-5 pt-4 border-t border-[#EAE0D2]/60 text-center text-xs sm:text-sm text-[#6B5E55]">
+            {isMarathi ? 'कदम विवाहवर नवीन आहात? ' : 'New to KadamVivah? '}
+            <Link 
+              to="/register" 
+              className="font-semibold text-[#7A1526] hover:text-[#8F1024] hover:underline transition-colors"
+            >
+              {isMarathi ? 'विनामूल्य प्रोफाइल तयार करा' : 'Create your free profile'}
+            </Link>
           </div>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-gray-600 text-sm mt-6">
-          100% Free Service • Zero Hidden Charges
+        {/* Trust Line */}
+        <p className="text-center text-xs sm:text-sm text-[#7A6E65] mt-5 sm:mt-6 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-[#B88E4B] shrink-0" />
+          <span>
+            {isMarathi
+              ? 'मराठा व देशमुख विवाह • गोपनीयतेला प्राधान्य'
+              : 'Maratha & Deshmukh Matrimony • Privacy-Focused'}
+          </span>
         </p>
       </div>
     </div>

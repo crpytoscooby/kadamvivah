@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Link } from 'react-router-dom';
 import { useToast } from '../components/Toast';
 import { handleImageError } from '../lib/avatarFallback';
 import api from '../lib/api';
@@ -22,17 +18,21 @@ import {
   Calendar,
   AlertTriangle,
   X,
-  Camera
+  Camera,
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import dayjs from 'dayjs';
 
 /**
  * Admin Dashboard - Pending Profile Approval & Moderation
  * 
- * Secure Admin-only page connected to real PHP/MySQL API endpoints:
- * - GET  /api/admin/profiles/pending
- * - POST /api/admin/profiles/{id}/approve
- * - POST /api/admin/profiles/{id}/reject
+ * Styled with KadamVivah premium design system:
+ * - Warm Ivory (#FAF7F2) background
+ * - Deep Maroon (#7A1526) primary accents & actions
+ * - Antique Gold (#B88E4B) badges & highlights
+ * - Warm borders (#EAE0D2) & structured moderation tables
+ * - Preserved all approval/rejection endpoints and session checks
  */
 
 export const Admin = () => {
@@ -99,13 +99,13 @@ export const Admin = () => {
     setApproveLoading(true);
     try {
       await api.post(`/admin/profiles/${profileId}/approve`);
-      showToast(`Profile of ${candidateName} has been approved!`, 'success');
+      showToast(`Profile of ${candidateName} approved successfully!`, 'success');
       
-      // Remove approved profile from pending list immediately
+      // Remove from list locally
       setPendingProfiles(prev => prev.filter(p => p.id !== profileId));
-
-      // Close modals
       setApprovingProfile(null);
+      
+      // If review modal was open for this profile, close it
       if (reviewingProfile?.id === profileId) {
         setReviewingProfile(null);
       }
@@ -124,8 +124,10 @@ export const Admin = () => {
 
   const handleConfirmReject = async (e) => {
     e.preventDefault();
+    if (!rejectingProfile || rejectLoading) return;
+
     if (!rejectionReason.trim()) {
-      showToast('Please provide a reason for rejection.', 'error');
+      showToast('Please provide a reason for rejecting this profile', 'error');
       return;
     }
 
@@ -135,17 +137,15 @@ export const Admin = () => {
     setRejectLoading(true);
     try {
       await api.post(`/admin/profiles/${profileId}/reject`, {
-        rejection_reason: rejectionReason.trim()
+        reason: rejectionReason.trim()
       });
+      showToast(`Profile of ${candidateName} has been rejected.`, 'info');
 
-      showToast(`Profile of ${candidateName} marked as rejected.`, 'success');
-
-      // Remove from list
+      // Remove from list locally
       setPendingProfiles(prev => prev.filter(p => p.id !== profileId));
-      
-      // Close modals
       setRejectingProfile(null);
-      setRejectionReason('');
+
+      // If review modal was open for this profile, close it
       if (reviewingProfile?.id === profileId) {
         setReviewingProfile(null);
       }
@@ -158,89 +158,100 @@ export const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-8">
+    <div className="min-h-screen bg-[#FAF7F2] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <ToastContainer />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Subtle background ambient pattern */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: 'radial-gradient(#7A1526 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 pb-5 border-b border-[#EAE0D2]">
           <div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                <UserCheck className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Moderation Dashboard</h1>
-                <p className="text-sm text-gray-500">Review, approve or reject incoming matrimonial profiles</p>
-              </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#F8F3EA] border border-[#D9C39E] rounded-full text-xs font-semibold text-[#7A1526] shadow-2xs mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#B88E4B] shrink-0" />
+              <span>Administration Moderation</span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2B1B17]">
+              Admin Moderation Dashboard
+            </h1>
+            <p className="text-xs sm:text-sm text-[#6B5E55] mt-0.5">
+              Review, approve or reject incoming matrimonial profiles before they go live on search.
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
+          <div className="flex items-center gap-3 self-start md:self-auto">
+            <button 
+              type="button"
               onClick={fetchPendingProfiles} 
               disabled={loading}
-              className="flex items-center gap-2"
+              className="px-3.5 py-2 bg-white border border-[#E2D8CC] hover:border-[#7A1526] text-[#2B1B17] text-xs sm:text-sm font-semibold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-2xs"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs font-semibold flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-600" />
-              Pending Review: {pendingProfiles.length}
+              <RefreshCw className={`w-3.5 h-3.5 text-[#7A1526] ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+            <div className="px-3 py-1.5 bg-[#FFFBF2] border border-[#E9D8B4] rounded-xl text-[#7A5416] text-xs font-bold flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#B88E4B]" />
+              <span>Pending: {pendingProfiles.length}</span>
             </div>
           </div>
         </div>
 
-        {/* Pending Profiles List */}
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader className="border-b border-gray-100 bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg text-gray-900">Profiles Awaiting Approval</CardTitle>
-                <CardDescription>
-                  These profiles were recently registered and are hidden from public view until approved.
-                </CardDescription>
-              </div>
-              <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full">
-                {pendingProfiles.length} Pending
-              </span>
+        {/* Pending Profiles Card Table */}
+        <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xs">
+          <div className="p-5 sm:p-6 border-b border-[#EAE0D2]/70 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-serif font-bold text-[#2B1B17]">
+                Profiles Awaiting Approval
+              </h2>
+              <p className="text-xs text-[#7A6E65] mt-0.5">
+                These profiles were recently registered and remain hidden from public search until approved.
+              </p>
             </div>
-          </CardHeader>
+            <span className="text-xs font-bold px-3 py-1 bg-[#FFFBF2] border border-[#E9D8B4] text-[#7A5416] rounded-full">
+              {pendingProfiles.length} Pending
+            </span>
+          </div>
 
-          <CardContent className="p-0">
+          <div className="p-0">
             {loading ? (
-              <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center">
-                <RefreshCw className="w-8 h-8 animate-spin text-primary mb-3" />
-                <p className="text-sm font-medium">Loading pending profiles from database...</p>
+              <div className="p-16 text-center text-[#7A6E65] flex flex-col items-center justify-center">
+                <RefreshCw className="w-8 h-8 animate-spin text-[#7A1526] mb-3" />
+                <p className="text-sm font-semibold text-[#2B1B17]">Loading pending profiles from database...</p>
               </div>
             ) : pendingProfiles.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle className="w-6 h-6" />
+              <div className="p-16 text-center">
+                <div className="w-14 h-14 bg-[#F4F9F4] text-green-700 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#CDE4CD]">
+                  <CheckCircle className="w-7 h-7" />
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 mb-1">All Caught Up!</h3>
-                <p className="text-sm text-gray-500 max-w-md mx-auto">
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17] mb-1">All Caught Up!</h3>
+                <p className="text-xs sm:text-sm text-[#6B5E55] max-w-md mx-auto">
                   There are no pending profile approval requests at this moment. New registrations will automatically appear here.
                 </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-[#EAE0D2] text-xs sm:text-sm">
+                  <thead className="bg-[#FAF7F2]">
                     <tr>
-                      <th className="px-6 py-3.5 text-left font-semibold text-gray-700">Candidate</th>
-                      <th className="px-6 py-3.5 text-left font-semibold text-gray-700">Age / Gender</th>
-                      <th className="px-6 py-3.5 text-left font-semibold text-gray-700">Location</th>
-                      <th className="px-6 py-3.5 text-left font-semibold text-gray-700">Education & Job</th>
-                      <th className="px-6 py-3.5 text-left font-semibold text-gray-700">Contact</th>
-                      <th className="px-6 py-3.5 text-left font-semibold text-gray-700">Registered On</th>
-                      <th className="px-6 py-3.5 text-right font-semibold text-gray-700">Actions</th>
+                      <th className="px-5 py-3.5 text-left font-bold text-[#2B1B17]">Candidate</th>
+                      <th className="px-5 py-3.5 text-left font-bold text-[#2B1B17]">Age / Gender</th>
+                      <th className="px-5 py-3.5 text-left font-bold text-[#2B1B17]">Location</th>
+                      <th className="px-5 py-3.5 text-left font-bold text-[#2B1B17]">Education & Job</th>
+                      <th className="px-5 py-3.5 text-left font-bold text-[#2B1B17]">Contact</th>
+                      <th className="px-5 py-3.5 text-left font-bold text-[#2B1B17]">Registered On</th>
+                      <th className="px-5 py-3.5 text-right font-bold text-[#2B1B17]">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-100">
+                  <tbody className="bg-white divide-y divide-[#EAE0D2]/60">
                     {pendingProfiles.map((p) => {
                       const age = p.date_of_birth ? dayjs().diff(dayjs(p.date_of_birth), 'year') : 'N/A';
                       const candidateName = `${p.first_name} ${p.last_name}`;
@@ -249,10 +260,10 @@ export const Admin = () => {
                       const isBusy = approveLoading || rejectLoading;
 
                       return (
-                        <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="px-6 py-4">
+                        <tr key={p.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                          <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-gray-200 aspect-[4/5] flex items-center justify-center">
+                              <div className="w-10 h-12 rounded-lg overflow-hidden bg-[#FAF7F2] border border-[#EAE0D2] shrink-0 flex items-center justify-center">
                                 <img
                                   src={p.primary_photo || (p.photos && p.photos[0]) || '/placeholder-avatar.svg'}
                                   alt={candidateName}
@@ -261,96 +272,94 @@ export const Admin = () => {
                                 />
                               </div>
                               <div>
-                                <div className="font-semibold text-gray-900">{candidateName}</div>
+                                <div className="font-bold text-[#2B1B17]">{candidateName}</div>
                                 {p.caste && (
-                                  <div className="text-xs text-gray-500 mt-0.5">
-                                    Caste: {p.caste} {p.sub_caste ? `(${p.sub_caste})` : ''}
+                                  <div className="text-[11px] text-[#7A1526] font-medium mt-0.5">
+                                    Community: {p.caste}
                                   </div>
                                 )}
                               </div>
                             </div>
                           </td>
 
-                          <td className="px-6 py-4 text-gray-600 capitalize">
+                          <td className="px-5 py-4 text-[#6B5E55] capitalize">
                             {age} yrs • {p.gender}
                           </td>
 
-                          <td className="px-6 py-4 text-gray-600">
+                          <td className="px-5 py-4 text-[#6B5E55]">
                             <div className="flex items-center gap-1.5">
-                              <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                              <MapPin className="w-3.5 h-3.5 text-[#7A1526] shrink-0" />
                               <span>{p.city || 'Pune'}, {p.state || 'Maharashtra'}</span>
                             </div>
                           </td>
 
-                          <td className="px-6 py-4 text-gray-600">
-                            <div className="font-medium text-gray-800">{p.education || 'Not specified'}</div>
-                            <div className="text-xs text-gray-500 mt-0.5">{p.occupation || 'Not specified'}</div>
+                          <td className="px-5 py-4 text-[#6B5E55]">
+                            <div className="font-semibold text-[#2B1B17]">{p.education || 'Not specified'}</div>
+                            <div className="text-[11px] text-[#7A6E65] mt-0.5">{p.occupation || 'Not specified'}</div>
                           </td>
 
-                          <td className="px-6 py-4 text-gray-600">
+                          <td className="px-5 py-4 text-[#6B5E55]">
                             <div className="text-xs flex items-center gap-1">
-                              <Phone className="w-3.5 h-3.5 text-gray-400" />
-                              {p.phone}
+                              <Phone className="w-3 h-3 text-[#7A6E65]" />
+                              <span>{p.phone}</span>
                             </div>
-                            <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                              <Mail className="w-3.5 h-3.5 text-gray-400" />
-                              {p.user_email || p.contact_email}
+                            <div className="text-[11px] text-[#7A6E65] mt-0.5 flex items-center gap-1">
+                              <Mail className="w-3 h-3 text-[#7A6E65]" />
+                              <span className="truncate max-w-[140px]">{p.user_email || p.contact_email}</span>
                             </div>
                           </td>
 
-                          <td className="px-6 py-4 text-xs text-gray-500">
+                          <td className="px-5 py-4 text-xs text-[#7A6E65]">
                             {dayjs(p.created_at).format('DD MMM YYYY, hh:mm A')}
                           </td>
 
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-5 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               {/* Inspect Full Details */}
-                              <Button
-                                variant="outline"
-                                size="sm"
+                              <button
+                                type="button"
                                 onClick={() => setReviewingProfile(p)}
                                 title="Inspect Full Profile Details"
                                 disabled={isBusy}
-                                className="h-8 px-2.5 text-xs text-gray-700"
+                                className="px-2.5 py-1.5 bg-white border border-[#E2D8CC] hover:border-[#7A1526] text-[#2B1B17] text-xs font-semibold rounded-lg transition cursor-pointer"
                               >
-                                <Eye className="w-3.5 h-3.5 mr-1" />
+                                <Eye className="w-3.5 h-3.5 inline mr-1 text-[#7A1526]" />
                                 Review
-                              </Button>
+                              </button>
 
                               {/* Approve Button */}
-                              <Button
-                                size="sm"
+                              <button
+                                type="button"
                                 onClick={() => openApproveModal(p)}
                                 disabled={isBusy}
-                                className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700 text-white font-medium"
+                                className="px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg transition flex items-center gap-1 cursor-pointer shadow-2xs"
                               >
                                 {isApproving ? (
                                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                                 ) : (
                                   <>
-                                    <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                                    <CheckCircle className="w-3.5 h-3.5" />
                                     Approve
                                   </>
                                 )}
-                              </Button>
+                              </button>
 
                               {/* Reject Button */}
-                              <Button
-                                variant="destructive"
-                                size="sm"
+                              <button
+                                type="button"
                                 onClick={() => openRejectModal(p)}
                                 disabled={isBusy}
-                                className="h-8 px-2.5 text-xs font-medium"
+                                className="px-2.5 py-1.5 bg-[#FDF2F2] border border-[#F5C2C7] hover:bg-red-100 text-[#9E1B32] text-xs font-semibold rounded-lg transition flex items-center gap-1 cursor-pointer"
                               >
                                 {isRejecting ? (
                                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                                 ) : (
                                   <>
-                                    <XCircle className="w-3.5 h-3.5 mr-1" />
+                                    <XCircle className="w-3.5 h-3.5" />
                                     Reject
                                   </>
                                 )}
-                              </Button>
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -360,36 +369,35 @@ export const Admin = () => {
                 </table>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* Profile Review Modal */}
-      {/* ========================================================================= */}
+      {/* Review Modal */}
       {reviewingProfile && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !approveLoading && !rejectLoading) {
               setReviewingProfile(null);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <div className="p-5 sm:p-6 border-b border-[#EAE0D2] flex items-center justify-between bg-[#FAF7F2]">
               <div>
-                <span className="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-800 rounded">
+                <span className="text-xs font-bold px-2.5 py-0.5 bg-[#FFFBF2] border border-[#E9D8B4] text-[#7A5416] rounded-full">
                   Pending Approval
                 </span>
-                <h3 className="text-xl font-bold text-gray-900 mt-1">
+                <h3 className="text-xl font-serif font-bold text-[#2B1B17] mt-1">
                   {reviewingProfile.first_name} {reviewingProfile.middle_name ? `${reviewingProfile.middle_name} ` : ''}{reviewingProfile.last_name}
                 </h3>
               </div>
               <button 
+                type="button"
                 onClick={() => setReviewingProfile(null)}
-                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-lg text-[#7A6E65] hover:text-[#2B1B17] hover:bg-white transition cursor-pointer"
                 disabled={approveLoading || rejectLoading}
               >
                 <X className="w-5 h-5" />
@@ -397,324 +405,236 @@ export const Admin = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 text-sm text-gray-700">
-              {/* Profile Photographs */}
+            <div className="p-6 overflow-y-auto space-y-6 text-xs sm:text-sm text-[#6B5E55]">
+              {/* Photos Gallery */}
               <div>
-                <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider text-primary mb-3 flex items-center gap-1.5">
-                  <Camera className="w-3.5 h-3.5" />
-                  Candidate Photographs ({reviewingProfile.photos?.length || (reviewingProfile.primary_photo ? 1 : 0)})
+                <h4 className="font-bold text-[#2B1B17] mb-2 flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-[#7A1526]" />
+                  Uploaded Photos
                 </h4>
-                {(!reviewingProfile.photos || reviewingProfile.photos.length === 0) && !reviewingProfile.primary_photo ? (
-                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                    <span>No photos uploaded for this profile yet.</span>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {(reviewingProfile.photos && reviewingProfile.photos.length > 0 
-                      ? reviewingProfile.photos 
-                      : [reviewingProfile.primary_photo]
-                    ).map((photoUrl, idx) => (
-                      <div 
-                        key={idx} 
-                        className="relative rounded-lg overflow-hidden border border-gray-200 bg-muted aspect-[4/5] w-full flex items-center justify-center shadow-sm"
-                      >
-                        <img
-                          src={photoUrl}
-                          alt={`Candidate Photo ${idx + 1}`}
-                          className="w-full h-full object-cover object-center"
-                          onError={handleImageError}
+                {reviewingProfile.photos && reviewingProfile.photos.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-3">
+                    {reviewingProfile.photos.map((photoUrl, idx) => (
+                      <div key={idx} className="relative aspect-[4/5] rounded-xl overflow-hidden bg-[#FAF7F2] border border-[#EAE0D2]">
+                        <img 
+                          src={photoUrl} 
+                          alt="Photo" 
+                          className="w-full h-full object-cover" 
+                          onError={handleImageError} 
                         />
-                        {idx === 0 && (
-                          <span className="absolute bottom-1.5 left-1.5 bg-primary text-white text-[10px] font-semibold px-2 py-0.5 rounded-md shadow">
-                            Primary
-                          </span>
-                        )}
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-xs text-[#7A6E65] italic">No photos uploaded</p>
                 )}
               </div>
 
-              {/* Personal Details */}
-              <div>
-                <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider text-primary mb-3">
-                  Personal & Location
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg">
-                  <div>
-                    <span className="text-xs text-gray-500 block">Gender:</span>
-                    <span className="font-medium capitalize">{reviewingProfile.gender}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Date of Birth:</span>
-                    <span className="font-medium">{reviewingProfile.date_of_birth}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Marital Status:</span>
-                    <span className="font-medium capitalize">{reviewingProfile.marital_status?.replace('_', ' ')}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">City & State:</span>
-                    <span className="font-medium">{reviewingProfile.city}, {reviewingProfile.state}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Pincode:</span>
-                    <span className="font-medium">{reviewingProfile.pincode || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Height:</span>
-                    <span className="font-medium">{reviewingProfile.height || 'N/A'}</span>
-                  </div>
+              {/* Biodata Fields */}
+              <div className="grid grid-cols-2 gap-4 bg-[#FAF7F2] p-4 rounded-xl border border-[#EAE0D2]">
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Gender:</span>
+                  <span className="font-semibold text-[#2B1B17] capitalize">{reviewingProfile.gender}</span>
+                </div>
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Date of Birth:</span>
+                  <span className="font-semibold text-[#2B1B17]">{reviewingProfile.date_of_birth || 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Community:</span>
+                  <span className="font-semibold text-[#2B1B17]">{reviewingProfile.caste || 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Location:</span>
+                  <span className="font-semibold text-[#2B1B17]">{reviewingProfile.city}, {reviewingProfile.state}</span>
+                </div>
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Education:</span>
+                  <span className="font-semibold text-[#2B1B17]">{reviewingProfile.education || 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Occupation:</span>
+                  <span className="font-semibold text-[#2B1B17]">{reviewingProfile.occupation || 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Annual Income:</span>
+                  <span className="font-semibold text-[#2B1B17]">{reviewingProfile.annual_income || 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="text-[#7A6E65] block text-[11px]">Phone:</span>
+                  <span className="font-semibold text-[#2B1B17]">{reviewingProfile.phone}</span>
                 </div>
               </div>
 
-              {/* Community & Career */}
-              <div>
-                <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider text-primary mb-3">
-                  Community, Education & Career
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg">
-                  <div>
-                    <span className="text-xs text-gray-500 block">Caste:</span>
-                    <span className="font-medium">{reviewingProfile.caste || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Sub-Caste:</span>
-                    <span className="font-medium">{reviewingProfile.sub_caste || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Gotra:</span>
-                    <span className="font-medium">{reviewingProfile.gotra || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Education:</span>
-                    <span className="font-medium">{reviewingProfile.education || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Occupation:</span>
-                    <span className="font-medium">{reviewingProfile.occupation || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Annual Income:</span>
-                    <span className="font-medium">{reviewingProfile.annual_income || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Family Details */}
-              <div>
-                <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider text-primary mb-3">
-                  Family Background
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg">
-                  <div>
-                    <span className="text-xs text-gray-500 block">Father's Name:</span>
-                    <span className="font-medium">{reviewingProfile.father_name || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Mother's Name:</span>
-                    <span className="font-medium">{reviewingProfile.mother_name || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">Siblings:</span>
-                    <span className="font-medium">{reviewingProfile.siblings || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div>
-                <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider text-primary mb-3">
-                  Contact Information
-                </h4>
-                <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg">
-                  <div>
-                    <span className="text-xs text-gray-500 block">Phone:</span>
-                    <span className="font-medium text-gray-900">{reviewingProfile.phone}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 block">User Email:</span>
-                    <span className="font-medium text-gray-900">{reviewingProfile.user_email}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bio & Hobbies */}
+              {/* Bio */}
               {reviewingProfile.bio && (
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider text-primary mb-2">
-                    About / Bio
-                  </h4>
-                  <p className="bg-gray-50 p-3 rounded-lg text-gray-700 italic">
-                    "{reviewingProfile.bio}"
+                  <h4 className="font-bold text-[#2B1B17] mb-1">About & Expectations:</h4>
+                  <p className="p-3 bg-[#FAF7F2] rounded-xl border border-[#EAE0D2] whitespace-pre-line text-xs leading-relaxed">
+                    {reviewingProfile.bio}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Modal Actions */}
-            <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-3">
-              <Button 
-                variant="outline" 
+            {/* Modal Footer Actions */}
+            <div className="p-4 sm:p-5 bg-[#FAF7F2] border-t border-[#EAE0D2] flex items-center justify-end gap-3">
+              <button
+                type="button"
                 onClick={() => setReviewingProfile(null)}
+                className="px-4 py-2 border border-[#E2D8CC] hover:bg-white text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
                 disabled={approveLoading || rejectLoading}
               >
                 Close
-              </Button>
-              <Button 
-                variant="destructive"
+              </button>
+              <button
+                type="button"
                 onClick={() => openRejectModal(reviewingProfile)}
+                className="px-4 py-2 bg-[#FDF2F2] border border-[#F5C2C7] hover:bg-red-100 text-[#9E1B32] text-xs font-bold rounded-xl transition cursor-pointer"
                 disabled={approveLoading || rejectLoading}
               >
                 Reject Profile
-              </Button>
-              <Button 
-                className="bg-green-600 hover:bg-green-700 text-white"
+              </button>
+              <button
+                type="button"
                 onClick={() => openApproveModal(reviewingProfile)}
+                className="px-5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 disabled={approveLoading || rejectLoading}
               >
+                <CheckCircle className="w-3.5 h-3.5" />
                 Approve Profile
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
       {/* Approve Confirmation Modal */}
-      {/* ========================================================================= */}
       {approvingProfile && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !approveLoading) {
               setApprovingProfile(null);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-green-600 mb-4">
-              <div className="p-2.5 bg-green-50 text-green-600 rounded-xl">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-green-50 border border-green-200 rounded-xl text-green-700">
                 <CheckCircle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Approve Profile?</h3>
-                <p className="text-xs text-gray-500">KadamVivah Profile Moderation</p>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17]">Approve Profile?</h3>
+                <p className="text-xs text-[#7A6E65]">Publish to Matrimonial Search</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to approve the profile for{' '}
-              <strong className="text-gray-900 font-semibold">
-                {approvingProfile.first_name} {approvingProfile.last_name}
-              </strong>
-              ? This profile will immediately become visible to approved members on KadamVivah.
+            <p className="text-xs sm:text-sm text-[#6B5E55] mb-4 leading-relaxed">
+              Are you sure you want to approve the profile for <strong className="text-[#2B1B17] font-semibold">{approvingProfile.first_name} {approvingProfile.last_name}</strong>?
+            </p>
+
+            <p className="text-xs text-[#7A6E65] mb-6">
+              This will make the candidate immediately visible on the public Browse Profiles page.
             </p>
 
             <div className="flex items-center justify-end gap-3">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <button
+                type="button"
                 onClick={() => setApprovingProfile(null)}
                 disabled={approveLoading}
+                className="px-4 py-2 border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
               >
                 Cancel
-              </Button>
-              <Button 
+              </button>
+              <button
                 type="button"
                 onClick={handleConfirmApprove}
                 disabled={approveLoading}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium flex items-center gap-2"
+                className="px-5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 {approveLoading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                     Approving...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="w-4 h-4" />
-                    Approve Profile
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    Yes, Approve Profile
                   </>
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* Rejection Reason Modal */}
-      {/* ========================================================================= */}
+      {/* Reject Modal */}
       {rejectingProfile && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !rejectLoading) {
               setRejectingProfile(null);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-red-600 mb-4">
-              <div className="p-2.5 bg-red-50 text-red-600 rounded-xl">
-                <AlertTriangle className="w-5 h-5" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-[#FDF2F2] border border-[#F5C2C7] rounded-xl text-[#9E1B32]">
+                <XCircle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Reject Profile</h3>
-                <p className="text-xs text-gray-500">Provide feedback reason for rejection</p>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17]">Reject Profile</h3>
+                <p className="text-xs text-[#7A6E65]">Request Profile Corrections</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
-              Please specify the reason for rejecting the profile of{' '}
-              <strong className="text-gray-900 font-semibold">
-                {rejectingProfile.first_name} {rejectingProfile.last_name}
-              </strong>.
-            </p>
-
             <form onSubmit={handleConfirmReject} className="space-y-4">
+              <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
+                Provide feedback explaining why the profile of <strong className="text-[#2B1B17] font-semibold">{rejectingProfile.first_name} {rejectingProfile.last_name}</strong> requires revision.
+              </p>
+
               <div>
-                <Label htmlFor="rejectionReason" className="text-xs font-semibold text-gray-700">
-                  Rejection Reason *
-                </Label>
-                <Textarea
-                  id="rejectionReason"
+                <label htmlFor="rejectReason" className="block text-xs font-bold text-[#2B1B17] mb-1.5">
+                  Reason for Rejection *
+                </label>
+                <textarea
+                  id="rejectReason"
                   rows={3}
-                  placeholder="e.g. Incomplete profile information or invalid contact details."
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  className="mt-1"
-                  disabled={rejectLoading}
+                  placeholder="e.g. Please upload a clearer face photograph, or fill in proper education details."
+                  className="w-full p-3 text-xs sm:text-sm border border-[#E2D8CC] rounded-xl bg-white text-[#2B1B17] placeholder:text-[#A89D91] focus:outline-none focus:border-[#7A1526] focus:ring-2 focus:ring-[#7A1526]/15 transition"
                   required
+                  disabled={rejectLoading}
                 />
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <button
+                  type="button"
                   onClick={() => setRejectingProfile(null)}
                   disabled={rejectLoading}
+                  className="px-4 py-2 border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
                 >
                   Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  variant="destructive"
+                </button>
+                <button
+                  type="submit"
                   disabled={rejectLoading}
-                  className="flex items-center gap-2"
+                  className="px-5 py-2 bg-[#9E1B32] hover:bg-[#7A1526] text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   {rejectLoading ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                       Rejecting...
                     </>
                   ) : (
                     'Confirm Rejection'
                   )}
-                </Button>
+                </button>
               </div>
             </form>
           </div>

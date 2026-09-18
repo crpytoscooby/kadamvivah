@@ -13,7 +13,6 @@ import { ProfileDetail } from './pages/ProfileDetail';
 import { MyProfile } from './pages/MyProfile';
 import { Interests } from './pages/Interests';
 import { Admin } from './pages/Admin';
-import { AdminImport } from './pages/AdminImport';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
@@ -105,14 +104,6 @@ function App() {
                 element={
                   <ProtectedRoute requireAdmin={true}>
                     <Admin />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/import"
-                element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminImport />
                   </ProtectedRoute>
                 }
               />

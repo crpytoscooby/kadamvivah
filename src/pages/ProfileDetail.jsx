@@ -1,32 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
-import { Textarea } from '../components/ui/textarea';
-import { Label } from '../components/ui/label';
+import { useTranslation } from 'react-i18next';
 import { 
   ArrowLeft, 
   MapPin, 
   Calendar, 
   GraduationCap, 
   Briefcase, 
-  DollarSign,
-  Users,
-  ShieldCheck,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  HeartHandshake,
-  Clock,
-  XCircle,
-  Phone,
-  Mail,
-  Send,
-  UserCheck,
-  Edit,
-  RefreshCw,
-  AlertCircle
+  Users, 
+  ShieldCheck, 
+  CheckCircle2, 
+  ChevronLeft, 
+  ChevronRight, 
+  Heart, 
+  HeartHandshake, 
+  Clock, 
+  Phone, 
+  Mail, 
+  Send, 
+  Edit, 
+  RefreshCw, 
+  AlertCircle,
+  Sparkles,
+  Award,
+  Lock
 } from 'lucide-react';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,14 +32,24 @@ import api from '../lib/api';
 import dayjs from 'dayjs';
 
 /**
- * ProfileDetail Page - Full profile view with real interest matching & contact privacy.
- * Fetches approved matrimonial profile from PHP REST API.
+ * ProfileDetail Page - Matrimonial Biodata View with Real Match & Privacy Logic
+ * 
+ * Styled with KadamVivah premium design system:
+ * - Warm Ivory (#FAF7F2) background
+ * - Deep Maroon (#7A1526) primary buttons & accents
+ * - Antique Gold (#B88E4B) badges & highlights
+ * - Approved Profile terminology (मंजूर प्रोफाइल)
+ * - Strict Marathi & English single-language support
+ * - Contact privacy strictly preserved until mutual match acceptance
  */
+
 export const ProfileDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast, ToastContainer } = useToast();
+  const { i18n } = useTranslation();
+  const isMarathi = (i18n.language || 'en').startsWith('mr');
   
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +102,7 @@ export const ProfileDetail = () => {
       if (error.response?.status === 404) {
         setNotFound(true);
       } else {
-        showToast(error.response?.data?.message || 'Failed to load profile details', 'error');
+        showToast(error.response?.data?.message || (isMarathi ? 'प्रोफाइल लोड करण्यात त्रुटी आली' : 'Failed to load profile details'), 'error');
         setNotFound(true);
       }
     } finally {
@@ -110,20 +117,18 @@ export const ProfileDetail = () => {
 
     setSendLoading(true);
     try {
-      const response = await api.post('/interests', {
+      await api.post('/interests', {
         receiver_profile_id: parseInt(id, 10),
         message: interestMessage.trim() || undefined
       });
 
-      showToast('Interest request sent successfully!', 'success');
+      showToast(isMarathi ? 'स्थळास पसंतीची विनंती पाठवली!' : 'Interest request sent successfully!', 'success');
       setSendModalOpen(false);
       setInterestMessage('');
-
-      // Refresh profile data to reflect new interest status
       fetchProfile();
     } catch (error) {
       console.error('Failed to send interest:', error);
-      showToast(error.response?.data?.message || 'Failed to send interest request', 'error');
+      showToast(error.response?.data?.message || (isMarathi ? 'पसंतीची विनंती पाठवण्यात त्रुटी आली' : 'Failed to send interest request'), 'error');
     } finally {
       setSendLoading(false);
     }
@@ -136,13 +141,13 @@ export const ProfileDetail = () => {
 
     setAcceptLoading(true);
     try {
-      const response = await api.post(`/interests/${interestId}/accept`);
-      showToast('Interest accepted! Contact details unlocked.', 'success');
+      await api.post(`/interests/${interestId}/accept`);
+      showToast(isMarathi ? 'विनंती स्वीकारली! संपर्क माहिती अनलॉक झाली.' : 'Interest accepted! Contact details unlocked.', 'success');
       setAcceptModalOpen(false);
       fetchProfile();
     } catch (error) {
       console.error('Failed to accept interest:', error);
-      showToast(error.response?.data?.message || 'Failed to accept interest', 'error');
+      showToast(error.response?.data?.message || (isMarathi ? 'विनंती स्वीकारण्यात त्रुटी आली' : 'Failed to accept interest'), 'error');
     } finally {
       setAcceptLoading(false);
     }
@@ -156,12 +161,12 @@ export const ProfileDetail = () => {
     setDeclineLoading(true);
     try {
       await api.post(`/interests/${interestId}/reject`);
-      showToast('Interest request declined.', 'success');
+      showToast(isMarathi ? 'विनंती नाकारली.' : 'Interest request declined.', 'success');
       setDeclineModalOpen(false);
       fetchProfile();
     } catch (error) {
       console.error('Failed to decline interest:', error);
-      showToast(error.response?.data?.message || 'Failed to decline interest', 'error');
+      showToast(error.response?.data?.message || (isMarathi ? 'विनंती नाकारण्यात त्रुटी आली' : 'Failed to decline interest'), 'error');
     } finally {
       setDeclineLoading(false);
     }
@@ -174,7 +179,13 @@ export const ProfileDetail = () => {
   };
 
   const formatMaritalStatus = (status) => {
-    if (!status) return 'Not Specified';
+    if (!status) return isMarathi ? 'नोंद नाही' : 'Not Specified';
+    if (isMarathi) {
+      if (status === 'never_married') return 'अविवाहित';
+      if (status === 'divorced') return 'घटस्फोटित';
+      if (status === 'widowed') return 'विधुर / विधवा';
+      if (status === 'separated') return 'विभक्त';
+    }
     return status
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -183,10 +194,12 @@ export const ProfileDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="min-h-[calc(100vh-140px)] bg-[#FAF7F2] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading profile details...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#7A1526] border-t-transparent mx-auto mb-3"></div>
+          <p className="text-sm text-[#7A6E65] font-medium">
+            {isMarathi ? 'प्रोफाइल लोड होत आहे...' : 'Loading profile details...'}
+          </p>
         </div>
       </div>
     );
@@ -194,26 +207,28 @@ export const ProfileDetail = () => {
 
   if (notFound || !profile) {
     return (
-      <div className="min-h-[70vh] bg-background py-16 px-4">
+      <div className="min-h-[calc(100vh-140px)] bg-[#FAF7F2] py-16 px-4 flex items-center justify-center relative overflow-hidden">
         <ToastContainer />
-        <div className="max-w-md mx-auto text-center">
-          <Card className="py-12 px-6">
-            <CardContent className="space-y-4">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto text-muted-foreground">
-                <Users className="w-8 h-8" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">Profile Not Found</h2>
-              <p className="text-muted-foreground text-sm">
-                This profile is either unavailable, pending approval, or does not exist.
-              </p>
-              <div className="pt-4">
-                <Button onClick={() => navigate('/profiles')}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Profiles
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="max-w-md w-full bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center shadow-sm">
+          <div className="w-14 h-14 bg-[#F8F3EA] border border-[#D9C39E] rounded-full flex items-center justify-center mx-auto text-[#7A1526] mb-4 shadow-2xs">
+            <Users className="w-7 h-7" />
+          </div>
+          <h2 className="text-2xl font-serif font-bold text-[#2B1B17] mb-2">
+            {isMarathi ? 'प्रोफाइल आढळले नाही' : 'Profile Not Found'}
+          </h2>
+          <p className="text-xs sm:text-sm text-[#6B5E55] mb-6">
+            {isMarathi 
+              ? 'हे प्रोफाइल सध्या उपलब्ध नाही, मंजुरीच्या प्रतीक्षेत आहे किंवा अस्तित्वात नाही.'
+              : 'This profile is either unavailable, pending approval, or does not exist.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/profiles')}
+            className="px-6 py-2.5 bg-[#7A1526] hover:bg-[#8F1024] text-white font-semibold text-xs sm:text-sm rounded-xl transition inline-flex items-center gap-2 cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{isMarathi ? 'सर्व स्थळे पहा' : 'Back to Profiles'}</span>
+          </button>
         </div>
       </div>
     );
@@ -226,7 +241,6 @@ export const ProfileDetail = () => {
   const lastName = profile.lastName || profile.last_name || '';
   const fullName = [firstName, middleName, lastName].filter(Boolean).join(' ');
   const caste = profile.caste;
-  const subCaste = profile.subCaste || profile.sub_caste;
   const maritalStatus = profile.maritalStatus || profile.marital_status;
   const fatherName = profile.fatherName || profile.father_name || profile.familyDetails?.fatherName;
   const motherName = profile.motherName || profile.mother_name || profile.familyDetails?.motherName;
@@ -237,9 +251,8 @@ export const ProfileDetail = () => {
   const isOwnProfile = profile.is_own_profile || (user?.profile_id && user?.profile_id === profile.id);
   const isAdmin = user?.role === 'admin';
   const interestStatus = profile.interest_status || {};
-  const hasInterest = interestStatus.has_interest;
-  const interestDirection = interestStatus.direction;
   const currentInterestStatus = interestStatus.status;
+  const interestDirection = interestStatus.direction;
   const isMatched = currentInterestStatus === 'accepted';
   const isSentPending = interestDirection === 'sent' && currentInterestStatus === 'pending';
   const isReceivedPending = interestDirection === 'received' && currentInterestStatus === 'pending';
@@ -263,35 +276,48 @@ export const ProfileDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8">
+    <div className="min-h-screen bg-[#FAF7F2] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <ToastContainer />
-      
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      {/* Subtle background ambient pattern */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: 'radial-gradient(#7A1526 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        
         {/* Top Navigation Bar */}
-        <div className="flex items-center justify-between mb-6">
-          <Button
-            variant="ghost"
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#EAE0D2]">
+          <button
+            type="button"
             onClick={() => navigate('/profiles')}
-            className="hover:bg-muted"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white border border-[#E2D8CC] hover:border-[#7A1526] rounded-xl text-xs sm:text-sm font-semibold text-[#2B1B17] transition shadow-2xs cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Profiles
-          </Button>
+            <ArrowLeft className="w-4 h-4 text-[#7A1526]" />
+            <span>{isMarathi ? 'सर्व स्थळे पहा' : 'Back to Profiles'}</span>
+          </button>
 
           {/* Quick Match Status Indicator */}
           {isMatched && (
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 text-green-800 rounded-full text-xs font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>Mutual Match Connected</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#F4F9F4] border border-[#CDE4CD] text-green-800 rounded-full text-xs font-semibold shadow-2xs">
+              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+              <span>{isMarathi ? 'परस्पर पसंती जुळली (Mutual Match)' : 'Mutual Match Connected'}</span>
             </div>
           )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
           {/* Left Column: Photo Carousel & Primary Interest Action (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            <Card className="overflow-hidden sticky top-24 shadow-sm">
-              <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted flex items-center justify-center">
+            <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm sticky top-24">
+              
+              <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#FAF7F2] flex items-center justify-center">
                 <img
                   src={photos[currentPhotoIndex]}
                   alt={fullName}
@@ -299,37 +325,45 @@ export const ProfileDetail = () => {
                   onError={handleImageError}
                 />
 
+                {/* Approved Profile Badge over photo */}
+                <div className="absolute top-3 left-3 bg-[#7A1526]/90 backdrop-blur-xs text-white text-xs font-semibold px-3 py-1 rounded-full shadow flex items-center gap-1.5 border border-[#D9C39E]/50">
+                  <Sparkles className="w-3.5 h-3.5 text-[#B88E4B]" />
+                  <span className={isMarathi ? 'font-devanagari font-bold' : 'font-sans'}>
+                    {isMarathi ? 'मंजूर प्रोफाइल' : 'Approved Profile'}
+                  </span>
+                </div>
+
                 {photos.length > 1 && (
                   <>
                     <button
                       onClick={prevPhoto}
                       disabled={currentPhotoIndex === 0}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full disabled:opacity-30 transition-all"
-                      aria-label="Previous photo"
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full disabled:opacity-20 transition-all cursor-pointer"
+                      aria-label={isMarathi ? 'मागील फोटो' : 'Previous photo'}
                     >
-                      <ChevronLeft className="w-6 h-6" />
+                      <ChevronLeft className="w-5 h-5" />
                     </button>
                     
                     <button
                       onClick={nextPhoto}
                       disabled={currentPhotoIndex === photos.length - 1}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full disabled:opacity-30 transition-all"
-                      aria-label="Next photo"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full disabled:opacity-20 transition-all cursor-pointer"
+                      aria-label={isMarathi ? 'पुढील फोटो' : 'Next photo'}
                     >
-                      <ChevronRight className="w-6 h-6" />
+                      <ChevronRight className="w-5 h-5" />
                     </button>
 
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full">
                       {photos.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentPhotoIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-all ${
+                          className={`h-1.5 rounded-full transition-all cursor-pointer ${
                             index === currentPhotoIndex
-                              ? 'bg-white w-6'
-                              : 'bg-white/50 hover:bg-white/70'
+                              ? 'bg-[#B88E4B] w-5'
+                              : 'bg-white/60 hover:bg-white w-1.5'
                           }`}
-                          aria-label={`Go to photo ${index + 1}`}
+                          aria-label={`Photo ${index + 1}`}
                         />
                       ))}
                     </div>
@@ -338,533 +372,603 @@ export const ProfileDetail = () => {
               </div>
 
               {/* Action Bar Beneath Photo */}
-              <div className="p-4 bg-white border-t border-gray-100">
+              <div className="p-4 sm:p-5 bg-white border-t border-[#EAE0D2]/70">
                 {isOwnProfile ? (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">This is your profile</span>
-                    <Link to="/my-profile">
-                      <Button size="sm" variant="outline" className="flex items-center gap-1.5">
-                        <Edit className="w-3.5 h-3.5" />
-                        Edit Profile
-                      </Button>
+                    <span className="text-xs font-medium text-[#7A6E65]">
+                      {isMarathi ? 'हे आपले स्वतःचे प्रोफाइल आहे' : 'This is your profile'}
+                    </span>
+                    <Link
+                      to="/my-profile"
+                      className="px-4 py-2 bg-[#7A1526] hover:bg-[#8F1024] text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>{isMarathi ? 'माहिती बदला' : 'Edit Profile'}</span>
                     </Link>
                   </div>
                 ) : isAdmin ? (
-                  <div className="p-3 bg-muted/60 border border-border rounded-lg text-xs text-muted-foreground flex items-center justify-between">
-                    <div className="flex items-center gap-2 font-medium text-foreground">
-                      <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Administrator View</span>
+                  <div className="p-3 bg-[#FAF7F2] border border-[#EAE0D2] rounded-xl text-xs text-[#7A6E65] flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-semibold text-[#2B1B17]">
+                      <ShieldCheck className="w-4 h-4 text-[#7A1526] shrink-0" />
+                      <span>{isMarathi ? 'प्रशासक दृश्य' : 'Administrator View'}</span>
                     </div>
-                    <Link to="/admin">
-                      <Button size="sm" variant="outline" className="h-7 px-2.5 text-xs">
-                        Admin Panel
-                      </Button>
+                    <Link
+                      to="/admin"
+                      className="px-3 py-1 bg-white border border-[#E2D8CC] rounded-lg text-xs font-semibold text-[#7A1526] hover:bg-[#FAF7F2] transition"
+                    >
+                      {isMarathi ? 'ॲडमिन पॅनेल' : 'Admin Panel'}
                     </Link>
                   </div>
                 ) : isMatched ? (
-                  <div className="w-full text-center py-2 px-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-xs font-semibold flex items-center justify-center gap-2">
+                  <div className="w-full text-center py-2.5 px-3 bg-[#F4F9F4] border border-[#CDE4CD] rounded-xl text-green-800 text-xs font-bold flex items-center justify-center gap-2">
                     <HeartHandshake className="w-4 h-4 text-green-600" />
-                    Matched & Connected!
+                    <span>{isMarathi ? 'परस्पर पसंती जुळली! संपर्क खाली पहा' : 'Matched & Connected!'}</span>
                   </div>
                 ) : isSentPending ? (
-                  <div className="w-full text-center py-2.5 px-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs font-semibold flex items-center justify-center gap-2">
-                    <Clock className="w-4 h-4 text-amber-600" />
-                    Interest Sent (Awaiting Response)
+                  <div className="w-full text-center py-2.5 px-3 bg-[#FFFBF2] border border-[#E9D8B4] rounded-xl text-[#7A5416] text-xs font-semibold flex items-center justify-center gap-2">
+                    <Clock className="w-4 h-4 text-[#B88E4B]" />
+                    <span>{isMarathi ? 'पसंतीची विनंती पाठवली आहे (प्रतीक्षेत)' : 'Interest Sent (Awaiting Response)'}</span>
                   </div>
                 ) : isReceivedPending ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-center font-medium text-gray-700">
-                      This member sent you an interest request:
+                  <div className="space-y-2.5">
+                    <p className="text-xs text-center font-medium text-[#2B1B17]">
+                      {isMarathi ? 'या सभासदाने आपल्याला पसंतीची विनंती पाठवली आहे:' : 'This member sent you an interest request:'}
                     </p>
                     <div className="flex items-center gap-2">
-                      <Button
+                      <button
+                        type="button"
                         onClick={() => setAcceptModalOpen(true)}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium"
+                        className="flex-1 py-2.5 px-3 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                        Accept Interest
-                      </Button>
-                      <Button
-                        variant="outline"
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{isMarathi ? 'स्वीकारा' : 'Accept Interest'}</span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setDeclineModalOpen(true)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                        className="py-2.5 px-3 bg-white border border-red-200 text-red-700 hover:bg-red-50 text-xs font-semibold rounded-xl transition cursor-pointer"
                       >
-                        Decline
-                      </Button>
+                        <span>{isMarathi ? 'नाकारा' : 'Decline'}</span>
+                      </button>
                     </div>
                   </div>
                 ) : isDeclined ? (
-                  <div className="w-full text-center py-2 px-3 bg-gray-100 rounded-lg text-gray-600 text-xs font-medium">
-                    Interest request was declined.
+                  <div className="w-full text-center py-2 px-3 bg-[#FAF7F2] rounded-xl text-[#7A6E65] text-xs font-medium border border-[#EAE0D2]">
+                    {isMarathi ? 'पसंतीची विनंती नाकारली गेली आहे.' : 'Interest request was declined.'}
                   </div>
                 ) : canSendInterest ? (
-                  <Button
+                  <button
+                    type="button"
                     onClick={() => setSendModalOpen(true)}
-                    className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm"
+                    className="w-full py-3 px-4 bg-[#7A1526] hover:bg-[#8F1024] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition shadow-sm cursor-pointer active:scale-[0.99]"
                   >
-                    <Heart className="w-4 h-4 fill-current" />
-                    Send Interest
-                  </Button>
+                    <Heart className="w-4 h-4 fill-current text-[#D9C39E]" />
+                    <span>{isMarathi ? 'पसंती कळवा (Send Interest)' : 'Send Interest'}</span>
+                  </button>
                 ) : (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <span>Your profile is currently awaiting admin approval. You will be able to send interest once approved.</span>
+                  <div className="p-3 bg-[#FFFBF2] border border-[#E9D8B4] rounded-xl text-xs text-[#7A5416] flex items-start gap-2">
+                    <Clock className="w-4 h-4 text-[#B88E4B] shrink-0 mt-0.5" />
+                    <span>
+                      {isMarathi
+                        ? 'आपले प्रोफाइल सध्या ॲडमिन मंजुरीच्या प्रतीक्षेत आहे. मंजुरीनंतर आपण पसंती पाठवू शकाल.'
+                        : 'Your profile is currently awaiting admin approval. You will be able to send interest once approved.'}
+                    </span>
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
           </div>
 
-          {/* Right Column: Profile Information (7 cols) */}
+          {/* Right Column: Profile Biodata Sections (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Header */}
-            <div>
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <h1 className="text-3xl font-bold text-foreground">
+            
+            {/* Candidate Header */}
+            <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2B1B17]">
                   {fullName}
                 </h1>
-                <span className="inline-flex items-center gap-1 text-xs bg-green-500/10 text-green-700 dark:text-green-400 font-medium px-2.5 py-0.5 rounded-full">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Verified Profile
+                <span className="inline-flex items-center gap-1 text-xs bg-[#F8F3EA] border border-[#D9C39E] text-[#7A1526] font-semibold px-2.5 py-0.5 rounded-full shadow-2xs">
+                  <Sparkles className="w-3.5 h-3.5 text-[#B88E4B]" />
+                  <span>{isMarathi ? 'मंजूर प्रोफाइल' : 'Approved Profile'}</span>
                 </span>
               </div>
-              <div className="flex items-center gap-4 text-muted-foreground mt-2 text-sm">
+
+              <div className="flex items-center gap-4 text-[#6B5E55] text-xs sm:text-sm flex-wrap">
                 {age !== null && (
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {age} years
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Calendar className="w-4 h-4 text-[#7A1526]" />
+                    <span>{age} {isMarathi ? 'वर्षे' : 'years'}</span>
                   </span>
                 )}
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  {profile.city}{profile.state ? `, ${profile.state}` : ''}
+                <span className="flex items-center gap-1.5 font-medium">
+                  <MapPin className="w-4 h-4 text-[#7A1526]" />
+                  <span>{profile.city}{profile.state ? `, ${profile.state}` : ''}</span>
                 </span>
+                {caste && (
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Award className="w-4 h-4 text-[#B88E4B]" />
+                    <span>{caste}</span>
+                  </span>
+                )}
               </div>
             </div>
 
             {/* UNLOCKED CONTACT DETAILS CARD (Displayed ONLY when mutual match or own profile) */}
             {profile.contact_unlocked && profile.contacts ? (
-              <Card className="border-green-300 bg-green-50/60 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-2 text-green-900 font-bold text-base">
-                      <ShieldCheck className="w-5 h-5 text-green-600" />
-                      Verified Contact Details
-                    </div>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 bg-green-600 text-white rounded-full">
-                      Mutual Match
-                    </span>
+              <div className="bg-[#F4F9F4] border border-[#CDE4CD] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-2 text-green-900 font-serif font-bold text-base sm:text-lg">
+                    <ShieldCheck className="w-5 h-5 text-green-700 shrink-0" />
+                    <span>{isMarathi ? 'थेट संपर्क माहिती (अनलॉक)' : 'Unlocked Contact Details'}</span>
                   </div>
+                  <span className="text-xs font-semibold px-3 py-0.5 bg-green-700 text-white rounded-full">
+                    {isMarathi ? 'परस्पर पसंती' : 'Mutual Match'}
+                  </span>
+                </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    {profile.contacts.phone && (
-                      <div className="p-3 bg-white rounded-lg border border-green-200 shadow-2xs">
-                        <span className="text-xs text-gray-500 block mb-1">Primary Mobile Number</span>
-                        <div className="flex items-center justify-between">
-                          <a href={`tel:${profile.contacts.phone}`} className="font-bold text-gray-900 hover:text-green-700">
-                            {profile.contacts.phone}
-                          </a>
-                          <a
-                            href={`tel:${profile.contacts.phone}`}
-                            className="px-2 py-0.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded transition-colors"
-                          >
-                            Call
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {profile.contacts.alternate_phone && (
-                      <div className="p-3 bg-white rounded-lg border border-green-200 shadow-2xs">
-                        <span className="text-xs text-gray-500 block mb-1">Alternate / WhatsApp Number</span>
-                        <div className="flex items-center justify-between">
-                          <a href={`tel:${profile.contacts.alternate_phone}`} className="font-bold text-gray-900 hover:text-green-700">
-                            {profile.contacts.alternate_phone}
-                          </a>
-                          <a
-                            href={`tel:${profile.contacts.alternate_phone}`}
-                            className="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded transition-colors"
-                          >
-                            Call
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {profile.contacts.contact_email && (
-                      <div className="p-3 bg-white rounded-lg border border-green-200 shadow-2xs sm:col-span-2">
-                        <span className="text-xs text-gray-500 block mb-1">Email Address</span>
-                        <div className="flex items-center justify-between">
-                          <a href={`mailto:${profile.contacts.contact_email}`} className="font-bold text-gray-900 hover:text-green-700 truncate mr-2">
-                            {profile.contacts.contact_email}
-                          </a>
-                          <a
-                            href={`mailto:${profile.contacts.contact_email}`}
-                            className="px-2.5 py-0.5 bg-green-100 hover:bg-green-200 text-green-800 text-xs font-medium rounded transition-colors flex-shrink-0"
-                          >
-                            Send Email
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              /* PRIVACY-PROTECTED CONTACT CARD */
-              <Card className="border-primary/20 bg-primary/5">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="w-6 h-6 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h3 className="text-base font-semibold text-foreground mb-1">
-                        Contact Information Protected
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Direct contact numbers and email are protected for member privacy. Express interest to connect and unlock mutual contact details.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Basic Details */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Personal Details</h2>
-                <dl className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b border-border">
-                    <dt className="text-muted-foreground">Gender</dt>
-                    <dd className="font-medium capitalize">{profile.gender === 'male' ? 'Male (पुरुष)' : profile.gender === 'female' ? 'Female (स्त्री)' : profile.gender}</dd>
-                  </div>
-                  {dob && (
-                    <div className="flex justify-between py-2 border-b border-border">
-                      <dt className="text-muted-foreground">Date of Birth</dt>
-                      <dd className="font-medium">{dayjs(dob).format('DD MMM YYYY')}</dd>
-                    </div>
-                  )}
-                  {maritalStatus && (
-                    <div className="flex justify-between py-2 border-b border-border">
-                      <dt className="text-muted-foreground">Marital Status</dt>
-                      <dd className="font-medium">{formatMaritalStatus(maritalStatus)}</dd>
-                    </div>
-                  )}
-                  {profile.height && (
-                    <div className="flex justify-between py-2 border-b border-border">
-                      <dt className="text-muted-foreground">Height</dt>
-                      <dd className="font-medium">{profile.height}</dd>
-                    </div>
-                  )}
-                  {caste && (
-                    <div className="flex justify-between py-2 border-b border-border">
-                      <dt className="text-muted-foreground">Caste</dt>
-                      <dd className="font-medium">
-                        {caste}
-                        {subCaste && ` • ${subCaste}`}
-                      </dd>
-                    </div>
-                  )}
-                  {profile.gotra && (
-                    <div className="flex justify-between py-2 border-b border-border">
-                      <dt className="text-muted-foreground">Gotra / Devak</dt>
-                      <dd className="font-medium">{profile.gotra}</dd>
-                    </div>
-                  )}
-                </dl>
-              </CardContent>
-            </Card>
-
-            {/* Education & Career */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Education & Career</h2>
-                <div className="space-y-3">
-                  {profile.education && (
-                    <div className="flex items-start gap-3">
-                      <GraduationCap className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Education / Qualification</p>
-                        <p className="font-medium">{profile.education}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs sm:text-sm">
+                  {profile.contacts.phone && (
+                    <div className="p-3.5 bg-white rounded-xl border border-green-200 shadow-2xs">
+                      <span className="text-xs text-[#7A6E65] block mb-1">
+                        {isMarathi ? 'प्राथमिक मोबाईल क्रमांक' : 'Primary Mobile Number'}
+                      </span>
+                      <div className="flex items-center justify-between">
+                        <a href={`tel:${profile.contacts.phone}`} className="font-bold text-[#2B1B17] hover:text-green-800 text-sm sm:text-base">
+                          {profile.contacts.phone}
+                        </a>
+                        <a
+                          href={`tel:${profile.contacts.phone}`}
+                          className="px-3 py-1 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-lg transition"
+                        >
+                          {isMarathi ? 'कॉल करा' : 'Call'}
+                        </a>
                       </div>
                     </div>
                   )}
-                  {profile.occupation && (
-                    <div className="flex items-start gap-3">
-                      <Briefcase className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Occupation / Profession</p>
-                        <p className="font-medium">{profile.occupation}</p>
+
+                  {profile.contacts.alternate_phone && (
+                    <div className="p-3.5 bg-white rounded-xl border border-green-200 shadow-2xs">
+                      <span className="text-xs text-[#7A6E65] block mb-1">
+                        {isMarathi ? 'पर्यायी / व्हॉट्सॲप क्रमांक' : 'Alternate / WhatsApp Number'}
+                      </span>
+                      <div className="flex items-center justify-between">
+                        <a href={`tel:${profile.contacts.alternate_phone}`} className="font-bold text-[#2B1B17] hover:text-green-800 text-sm sm:text-base">
+                          {profile.contacts.alternate_phone}
+                        </a>
+                        <a
+                          href={`tel:${profile.contacts.alternate_phone}`}
+                          className="px-3 py-1 bg-[#FAF7F2] border border-[#E2D8CC] text-[#2B1B17] hover:bg-white text-xs font-bold rounded-lg transition"
+                        >
+                          {isMarathi ? 'कॉल' : 'Call'}
+                        </a>
                       </div>
                     </div>
                   )}
-                  {profile.annualIncome && (
-                    <div className="flex items-start gap-3">
-                      <DollarSign className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Annual Income / Package</p>
-                        <p className="font-medium">{profile.annualIncome}</p>
+
+                  {profile.contacts.contact_email && (
+                    <div className="p-3.5 bg-white rounded-xl border border-green-200 shadow-2xs sm:col-span-2">
+                      <span className="text-xs text-[#7A6E65] block mb-1">
+                        {isMarathi ? 'ईमेल पत्ता' : 'Email Address'}
+                      </span>
+                      <div className="flex items-center justify-between">
+                        <a href={`mailto:${profile.contacts.contact_email}`} className="font-bold text-[#2B1B17] hover:text-green-800 truncate mr-2 text-sm sm:text-base">
+                          {profile.contacts.contact_email}
+                        </a>
+                        <a
+                          href={`mailto:${profile.contacts.contact_email}`}
+                          className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-900 text-xs font-bold rounded-lg transition shrink-0"
+                        >
+                          {isMarathi ? 'ईमेल पाठवा' : 'Send Email'}
+                        </a>
                       </div>
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Family Details */}
-            {hasFamilyDetails && (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Family Details
-                  </h2>
-                  <dl className="space-y-3 text-sm">
-                    {fatherName && (
-                      <div className="flex justify-between py-2 border-b border-border">
-                        <dt className="text-muted-foreground">Father's Name</dt>
-                        <dd className="font-medium">{fatherName}</dd>
-                      </div>
-                    )}
-                    {motherName && (
-                      <div className="flex justify-between py-2 border-b border-border">
-                        <dt className="text-muted-foreground">Mother's Name</dt>
-                        <dd className="font-medium">{motherName}</dd>
-                      </div>
-                    )}
-                    {siblings && (
-                      <div className="flex justify-between py-2 border-b border-border">
-                        <dt className="text-muted-foreground">Siblings</dt>
-                        <dd className="font-medium">{siblings}</dd>
-                      </div>
-                    )}
-                    {familyType && (
-                      <div className="flex justify-between py-2 border-b border-border">
-                        <dt className="text-muted-foreground">Family Type</dt>
-                        <dd className="font-medium capitalize">{familyType}</dd>
-                      </div>
-                    )}
-                  </dl>
-                </CardContent>
-              </Card>
+              </div>
+            ) : (
+              /* PRIVACY-PROTECTED CONTACT CARD */
+              <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xs">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-[#F8F3EA] border border-[#D9C39E]/60 flex items-center justify-center text-[#7A1526] shrink-0 mt-0.5">
+                    <Lock className="w-5 h-5 text-[#7A1526]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-serif font-bold text-[#2B1B17] mb-1">
+                      {isMarathi ? 'संपर्क माहिती गोपनीयतेखाली संरक्षित' : 'Contact Information Protected'}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
+                      {isMarathi
+                        ? 'सभासदांच्या गोपनीयतेसाठी थेट मोबाईल क्रमांक आणि ईमेल संरक्षित ठेवले आहेत. पसंतीची विनंती पाठवा; ती स्वीकारल्यानंतर दोन्ही बाजूंचे संपर्क अनलॉक होतात.'
+                        : 'Direct contact numbers and email are protected for member privacy. Express interest to connect and unlock mutual contact details.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
 
-            {/* Bio */}
+            {/* Section: Personal Details */}
+            <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-[#2B1B17] mb-4 pb-3 border-b border-[#EAE0D2]/70">
+                {isMarathi ? 'वैयक्तिक माहिती' : 'Personal Details'}
+              </h2>
+              
+              <dl className="space-y-3 text-xs sm:text-sm">
+                <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                  <dt className="text-[#7A6E65]">{isMarathi ? 'लिंग' : 'Gender'}</dt>
+                  <dd className="font-semibold text-[#2B1B17] capitalize">
+                    {profile.gender === 'male' ? (isMarathi ? 'वर (पुरुष)' : 'Male') : profile.gender === 'female' ? (isMarathi ? 'वधू (स्त्री)' : 'Female') : profile.gender}
+                  </dd>
+                </div>
+
+                {dob && (
+                  <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                    <dt className="text-[#7A6E65]">{isMarathi ? 'जन्मतारीख' : 'Date of Birth'}</dt>
+                    <dd className="font-semibold text-[#2B1B17]">{dayjs(dob).format('DD MMMM YYYY')}</dd>
+                  </div>
+                )}
+
+                {maritalStatus && (
+                  <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                    <dt className="text-[#7A6E65]">{isMarathi ? 'वैवाहिक स्थिती' : 'Marital Status'}</dt>
+                    <dd className="font-semibold text-[#2B1B17]">{formatMaritalStatus(maritalStatus)}</dd>
+                  </div>
+                )}
+
+                {profile.height && (
+                  <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                    <dt className="text-[#7A6E65]">{isMarathi ? 'उंची' : 'Height'}</dt>
+                    <dd className="font-semibold text-[#2B1B17]">{profile.height}</dd>
+                  </div>
+                )}
+
+                {caste && (
+                  <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                    <dt className="text-[#7A6E65]">{isMarathi ? 'समाज' : 'Community'}</dt>
+                    <dd className="font-semibold text-[#2B1B17]">{caste}</dd>
+                  </div>
+                )}
+
+                {profile.gotra && (
+                  <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                    <dt className="text-[#7A6E65]">{isMarathi ? 'गोत्र / देवक' : 'Gotra / Devak'}</dt>
+                    <dd className="font-semibold text-[#2B1B17]">{profile.gotra}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+
+            {/* Section: Education & Career */}
+            <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-[#2B1B17] mb-4 pb-3 border-b border-[#EAE0D2]/70">
+                {isMarathi ? 'शिक्षण आणि व्यवसाय' : 'Education & Career'}
+              </h2>
+
+              <div className="space-y-4">
+                {profile.education && (
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#F8F3EA] border border-[#D9C39E]/60 flex items-center justify-center text-[#7A1526] shrink-0 mt-0.5">
+                      <GraduationCap className="w-4 h-4 text-[#7A1526]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#7A6E65]">{isMarathi ? 'शैक्षणिक पात्रता' : 'Education / Qualification'}</p>
+                      <p className="font-semibold text-[#2B1B17] text-sm sm:text-base mt-0.5">{profile.education}</p>
+                    </div>
+                  </div>
+                )}
+
+                {profile.occupation && (
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#F8F3EA] border border-[#D9C39E]/60 flex items-center justify-center text-[#7A1526] shrink-0 mt-0.5">
+                      <Briefcase className="w-4 h-4 text-[#7A1526]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#7A6E65]">{isMarathi ? 'व्यवसाय / नोकरी' : 'Occupation / Profession'}</p>
+                      <p className="font-semibold text-[#2B1B17] text-sm sm:text-base mt-0.5">{profile.occupation}</p>
+                    </div>
+                  </div>
+                )}
+
+                {profile.annualIncome && (
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#F8F3EA] border border-[#D9C39E]/60 flex items-center justify-center text-[#7A1526] shrink-0 mt-0.5">
+                      <Award className="w-4 h-4 text-[#B88E4B]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#7A6E65]">{isMarathi ? 'वार्षिक उत्पन्न' : 'Annual Income / Package'}</p>
+                      <p className="font-semibold text-[#2B1B17] text-sm sm:text-base mt-0.5">{profile.annualIncome}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section: Family Details */}
+            {hasFamilyDetails && (
+              <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs">
+                <h2 className="text-base sm:text-lg font-serif font-bold text-[#2B1B17] mb-4 pb-3 border-b border-[#EAE0D2]/70 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#7A1526]" />
+                  <span>{isMarathi ? 'कौटुंबिक माहिती' : 'Family Details'}</span>
+                </h2>
+
+                <dl className="space-y-3 text-xs sm:text-sm">
+                  {fatherName && (
+                    <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                      <dt className="text-[#7A6E65]">{isMarathi ? 'वडिलांचे नाव' : "Father's Name"}</dt>
+                      <dd className="font-semibold text-[#2B1B17]">{fatherName}</dd>
+                    </div>
+                  )}
+                  {motherName && (
+                    <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                      <dt className="text-[#7A6E65]">{isMarathi ? 'आईचे नाव' : "Mother's Name"}</dt>
+                      <dd className="font-semibold text-[#2B1B17]">{motherName}</dd>
+                    </div>
+                  )}
+                  {siblings && (
+                    <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                      <dt className="text-[#7A6E65]">{isMarathi ? 'भावंडे' : 'Siblings'}</dt>
+                      <dd className="font-semibold text-[#2B1B17]">{siblings}</dd>
+                    </div>
+                  )}
+                  {familyType && (
+                    <div className="flex justify-between py-2 border-b border-[#EAE0D2]/50">
+                      <dt className="text-[#7A6E65]">{isMarathi ? 'कुटुंब प्रकार' : 'Family Type'}</dt>
+                      <dd className="font-semibold text-[#2B1B17] capitalize">
+                        {familyType === 'nuclear' ? (isMarathi ? 'विभक्त' : 'Nuclear') : familyType === 'joint' ? (isMarathi ? 'एकत्र' : 'Joint') : familyType}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            )}
+
+            {/* Section: Bio & Expectations */}
             {profile.bio && (
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">About the Candidate & Expectations</h2>
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{profile.bio}</p>
-                </CardContent>
-              </Card>
+              <div className="bg-white/95 backdrop-blur-xs border border-[#EAE0D2] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs">
+                <h2 className="text-base sm:text-lg font-serif font-bold text-[#2B1B17] mb-3 pb-3 border-b border-[#EAE0D2]/70">
+                  {isMarathi ? 'उमेदवाराबद्दल व जोडीदाराकडून अपेक्षा' : 'About Candidate & Expectations'}
+                </h2>
+                <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed whitespace-pre-line">
+                  {profile.bio}
+                </p>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ========================================================================= */}
       {/* Send Interest Modal */}
-      {/* ========================================================================= */}
       {sendModalOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !sendLoading) {
               setSendModalOpen(false);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-primary mb-4">
-              <div className="p-2.5 bg-primary/10 rounded-xl">
-                <Heart className="w-6 h-6 fill-current" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-[#F8F3EA] border border-[#D9C39E] rounded-xl text-[#7A1526]">
+                <Heart className="w-5 h-5 fill-current" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Send Interest</h3>
-                <p className="text-xs text-gray-500">Connect with {fullName}</p>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17]">
+                  {isMarathi ? 'पसंतीची विनंती पाठवा' : 'Send Interest'}
+                </h3>
+                <p className="text-xs text-[#7A6E65]">{fullName}</p>
               </div>
             </div>
 
             <form onSubmit={handleConfirmSendInterest} className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Express interest in connecting with <strong className="text-gray-900">{fullName}</strong>. Once they accept, verified direct contact numbers and email will be shared mutually.
+              <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
+                {isMarathi ? (
+                  <>
+                    <strong className="text-[#2B1B17]">{fullName}</strong> यांच्या प्रोफाइलला पसंती कळवा. विनंती स्वीकारल्यानंतर थेट संपर्क क्रमांक व ईमेल दोन्ही बाजूंस अनलॉक होईल.
+                  </>
+                ) : (
+                  <>
+                    Express interest in connecting with <strong className="text-[#2B1B17]">{fullName}</strong>. Once accepted, contact details will be shared mutually.
+                  </>
+                )}
               </p>
 
               <div>
-                <Label htmlFor="interestMsg" className="text-xs font-semibold text-gray-700">
-                  Optional Message (संदेश)
-                </Label>
-                <Textarea
+                <label htmlFor="interestMsg" className="block text-xs font-semibold text-[#2B1B17] mb-1.5">
+                  {isMarathi ? 'संदेश (ऐच्छिक)' : 'Optional Message'}
+                </label>
+                <textarea
                   id="interestMsg"
                   rows={3}
-                  placeholder="e.g. Namaste! I found your profile very suitable and would like to connect with your family."
+                  placeholder={
+                    isMarathi
+                      ? 'उदा. नमस्ते! आम्हाला आपले प्रोफाइल योग्य वाटले असून आपल्या कुटुंबाशी चर्चा करण्याची इच्छा आहे.'
+                      : 'e.g. Namaste! I found your profile very suitable and would like to connect with your family.'
+                  }
                   value={interestMessage}
                   onChange={(e) => setInterestMessage(e.target.value)}
                   maxLength={500}
-                  className="mt-1"
+                  className="w-full p-3 text-xs sm:text-sm border border-[#E2D8CC] rounded-xl bg-white text-[#2B1B17] placeholder:text-[#A89D91] focus:outline-none focus:border-[#7A1526] focus:ring-2 focus:ring-[#7A1526]/15 transition"
                   disabled={sendLoading}
                 />
-                <span className="text-xs text-gray-400 block mt-1 text-right">
+                <span className="text-[11px] text-[#A89D91] block mt-1 text-right">
                   {interestMessage.length}/500
                 </span>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">
-                <Button
+                <button
                   type="button"
-                  variant="outline"
                   onClick={() => setSendModalOpen(false)}
                   disabled={sendLoading}
+                  className="px-4 py-2 border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
                 >
-                  Cancel
-                </Button>
-                <Button
+                  {isMarathi ? 'रद्द करा' : 'Cancel'}
+                </button>
+                <button
                   type="submit"
                   disabled={sendLoading}
-                  className="flex items-center gap-2 font-medium"
+                  className="px-5 py-2 bg-[#7A1526] hover:bg-[#8F1024] text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs"
                 >
                   {sendLoading ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      Sending...
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>{isMarathi ? 'पाठवत आहे...' : 'Sending...'}</span>
                     </>
                   ) : (
                     <>
-                      <Send className="w-4 h-4" />
-                      Send Interest Request
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{isMarathi ? 'विनंती पाठवा' : 'Send Interest Request'}</span>
                     </>
                   )}
-                </Button>
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
       {/* Accept Interest Modal */}
-      {/* ========================================================================= */}
       {acceptModalOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !acceptLoading) {
               setAcceptModalOpen(false);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-green-600 mb-4">
-              <div className="p-2.5 bg-green-50 rounded-xl">
-                <HeartHandshake className="w-6 h-6" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-[#F4F9F4] border border-[#CDE4CD] rounded-xl text-green-700">
+                <HeartHandshake className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Accept Interest Request?</h3>
-                <p className="text-xs text-gray-500">Mutual Connection on KadamVivah</p>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17]">
+                  {isMarathi ? 'पसंतीची विनंती स्वीकारायची आहे का?' : 'Accept Interest Request?'}
+                </h3>
+                <p className="text-xs text-[#7A6E65]">{fullName}</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
-              You are about to accept the interest request from{' '}
-              <strong className="text-gray-900 font-semibold">{fullName}</strong>.
+            <p className="text-xs sm:text-sm text-[#6B5E55] mb-4 leading-relaxed">
+              {isMarathi ? (
+                <>
+                  आपण <strong className="text-[#2B1B17]">{fullName}</strong> यांची पसंती विनंती स्वीकारत आहात.
+                </>
+              ) : (
+                <>
+                  You are about to accept the interest request from <strong className="text-[#2B1B17]">{fullName}</strong>.
+                </>
+              )}
             </p>
 
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800 mb-6 flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+            <div className="p-3 bg-[#F4F9F4] border border-[#CDE4CD] rounded-xl text-xs text-green-900 mb-6 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-green-700 shrink-0 mt-0.5" />
               <span>
-                Upon accepting, your mutual contact numbers and email will become immediately visible to each other.
+                {isMarathi
+                  ? 'स्वीकृतीनंतर दोन्ही बाजूंचे थेट संपर्क क्रमांक व ईमेल त्वरित दृश्यमान होतील.'
+                  : 'Upon accepting, your mutual contact numbers and email will become immediately visible to each other.'}
               </span>
             </div>
 
             <div className="flex items-center justify-end gap-3">
-              <Button
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => setAcceptModalOpen(false)}
                 disabled={acceptLoading}
+                className="px-4 py-2 border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
               >
-                Cancel
-              </Button>
-              <Button
+                {isMarathi ? 'रद्द करा' : 'Cancel'}
+              </button>
+              <button
                 type="button"
                 onClick={handleConfirmAccept}
                 disabled={acceptLoading}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium flex items-center gap-2"
+                className="px-5 py-2 bg-green-700 hover:bg-green-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs"
               >
                 {acceptLoading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Accepting...
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isMarathi ? 'स्वीकारत आहे...' : 'Accepting...'}</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    Accept Interest
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{isMarathi ? 'होय, स्वीकारा' : 'Accept Interest'}</span>
                   </>
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
       {/* Decline Interest Modal */}
-      {/* ========================================================================= */}
       {declineModalOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !declineLoading) {
               setDeclineModalOpen(false);
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-red-600 mb-4">
-              <div className="p-2.5 bg-red-50 rounded-xl">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[#EAE0D2] animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-[#FDF2F2] border border-[#F5C2C7] rounded-xl text-[#9E1B32]">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Decline Interest Request?</h3>
-                <p className="text-xs text-gray-500">Decline Match Invitation</p>
+                <h3 className="text-lg font-serif font-bold text-[#2B1B17]">
+                  {isMarathi ? 'विनंती नाकारायची आहे का?' : 'Decline Interest Request?'}
+                </h3>
+                <p className="text-xs text-[#7A6E65]">{fullName}</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to decline the interest request from{' '}
-              <strong className="text-gray-900 font-semibold">{fullName}</strong>?
+            <p className="text-xs sm:text-sm text-[#6B5E55] mb-4 leading-relaxed">
+              {isMarathi ? (
+                <>
+                  आपण <strong className="text-[#2B1B17]">{fullName}</strong> यांची पसंती विनंती नाकारू इच्छिता का?
+                </>
+              ) : (
+                <>
+                  Are you sure you want to decline the interest request from <strong className="text-[#2B1B17]">{fullName}</strong>?
+                </>
+              )}
             </p>
 
-            <p className="text-xs text-gray-500 mb-6">
-              Your contact details will remain private and will not be shared.
+            <p className="text-xs text-[#7A6E65] mb-6">
+              {isMarathi
+                ? 'आपली संपर्क माहिती पूर्णपणे सुरक्षित राहील आणि कोणालाही दिसणार नाही.'
+                : 'Your contact details will remain private and will not be shared.'}
             </p>
 
             <div className="flex items-center justify-end gap-3">
-              <Button
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => setDeclineModalOpen(false)}
                 disabled={declineLoading}
+                className="px-4 py-2 border border-[#E2D8CC] hover:bg-[#FAF7F2] text-[#2B1B17] text-xs font-semibold rounded-xl transition cursor-pointer"
               >
-                Cancel
-              </Button>
-              <Button
+                {isMarathi ? 'रद्द करा' : 'Cancel'}
+              </button>
+              <button
                 type="button"
-                variant="destructive"
                 onClick={handleConfirmDecline}
                 disabled={declineLoading}
-                className="flex items-center gap-2"
+                className="px-5 py-2 bg-[#9E1B32] hover:bg-[#7A1526] text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs"
               >
                 {declineLoading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Declining...
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isMarathi ? 'नाकारत आहे...' : 'Declining...'}</span>
                   </>
                 ) : (
-                  'Decline Interest'
+                  <span>{isMarathi ? 'होय, नाकारा' : 'Decline Interest'}</span>
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>

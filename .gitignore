@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 .pnp
 .pnp.js
@@ -39,3 +39,6 @@ Thumbs.db
 # User Uploads (Ignore uploaded candidate images but preserve directory security .htaccess)
 uploads/photos/*
 !uploads/photos/.htaccess
+
+# Antigravity agent skills / local scratch
+.agents/
